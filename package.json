@@ -12,6 +12,7 @@
 		"prepare": "husky install"
 	},
 	"dependencies": {
+		"less": "^4.2.0",
 		"vue": "^3.3.4"
 	},
 	"devDependencies": {
@@ -27,8 +28,11 @@
 		"eslint-plugin-prettier": "^5.0.0",
 		"eslint-plugin-vue": "^9.17.0",
 		"husky": "^8.0.3",
+		"less-loader": "^7.3.0",
 		"lint-staged": "^14.0.1",
 		"prettier": "^3.0.3",
+		"sass": "^1.66.1",
+		"sass-loader": "^13.3.2",
 		"stylelint": "^15.10.3",
 		"stylelint-config-rational-order": "^0.1.2",
 		"stylelint-config-standard": "^34.0.0",
