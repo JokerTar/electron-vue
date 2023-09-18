@@ -1,0 +1,60 @@
+@import url('./default.less');
+
+::-webkit-scrollbar {
+	width: 6px;
+	border-radius: 10px;
+	// height: 6px;
+}
+
+::-webkit-scrollbar-track-piece {
+	background-color: transparent;
+	border: none;
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	width: 6px;
+	// height: 6px;
+	background: rgb(0 0 0 / 30%);
+	border-radius: 10px;
+}
+
+#html {
+	body {
+		width: 100% !important;
+	}
+
+	&.color-weak {
+		filter: invert(80%);
+	}
+
+	&.gray-mode {
+		filter: grayscale(100%);
+		filter: gray;
+	}
+
+	// 修复VITE_PLUGIN_THEME style生成的样式问题(viteThemePlugin)
+	.ant-btn-primary {
+		&:active,
+		&:hover,
+		&:focus {
+			color: #fff;
+		}
+	}
+}
+
+#app {
+	height: 100%;
+
+	.ant-layout {
+		height: 100%;
+	}
+
+	&.user-layout {
+		overflow: auto;
+
+		.app-main {
+			height: 100%;
+		}
+	}
+}
