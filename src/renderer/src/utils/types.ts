@@ -22,6 +22,7 @@ export const isFunction = (val: unknown) => typeof val === 'function';
 export const isString = (val: unknown) => typeof val === 'string';
 export const isNumber = (val: unknown) => typeof val === 'number';
 export const isSymbol = (val: unknown) => typeof val === 'symbol';
+export const isBoolean = (val: unknown) => typeof val === 'boolean';
 export const isObject = (val: unknown) => val !== null && typeof val === 'object';
 export const isPromise = <T = any>(val: unknown): val is Promise<T> => {
 	// @ts-ignore

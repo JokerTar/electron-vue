@@ -6,6 +6,7 @@
 					:is="getFormItemType(schema.type)"
 					v-model:[getModalBind(getFormItemType(schema.type))]="modelRef[schema.field]"
 					v-bind="schema.props"
+					:rootName="rootName"
 				>
 					<template v-for="slot in Object.keys($slots)" #[getSlotName(slot)]="record" :key="`${getSlotName(slot)}_${schema.slot}`">
 						<slot v-bind="record" :key="`${getSlotName(slot)}_${schema.slot}_slot`" :name="[`${getSlotName(slot)}_${schema.slot}`]" />
@@ -14,23 +15,24 @@
 			</FormItem>
 		</template>
 	</a-form>
-	<!-- <ProUpload /> -->
 </template>
 
 <script lang="ts" setup>
-import { provide, toRefs, reactive } from 'vue';
-import { formProps } from './form';
+import { provide, inject } from 'vue';
+import { formProps, formEmits } from './form';
 import { useForm, useFormStyle } from '../hooks';
 // import { formContextKey } from '../../../tokens';
 import FormItem from './form-item.vue';
 
 const props = defineProps(formProps);
-const emits = defineEmits(['register']);
+const emits = defineEmits(formEmits);
 
 const { ns } = useFormStyle();
 
 const {
 	modelRef,
+	injectQueue,
+	rootName,
 	schemasRef,
 	getFormBind,
 	getModalBind,
@@ -45,11 +47,12 @@ const {
 	validate,
 	validateField,
 	clearValidate,
-} = useForm(props);
+	getInterface,
+	saveInjectInRoot,
+} = useForm(props, emits);
 
-emits('register', {
-	modelRef,
-	props,
+const formApi = {
+	injectQueue,
 	setProps,
 	addField,
 	removeField,
@@ -58,22 +61,25 @@ emits('register', {
 	validate,
 	validateField,
 	clearValidate,
+	getInterface,
+};
+
+emits('register', {
+	modelRef,
+	props,
+	...formApi,
 });
 
-provide(
-	Symbol('formContextKey'),
-	reactive({
-		...toRefs(props),
-		// emits
+let injectQueueMap;
+if (props.name && props.name === rootName.value) {
+	saveInjectInRoot(props.name, formApi.injectQueue);
+	provide(rootName.value, formApi.injectQueue);
+	injectQueueMap = formApi.injectQueue;
+} else {
+	injectQueueMap = inject(rootName.value);
+}
 
-		setProps,
-		addField,
-		removeField,
-		submit,
-		reset,
-		validate,
-		validateField,
-		clearValidate,
-	})
-);
+if (props.name && injectQueueMap) {
+	saveInjectInRoot(props.name, injectQueueMap);
+}
 </script>

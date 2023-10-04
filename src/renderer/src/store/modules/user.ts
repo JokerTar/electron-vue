@@ -4,13 +4,13 @@ import { defineStore } from 'pinia';
 import { usePromiseStore } from './permission';
 import { useTagsViewStore } from './tags-view';
 import { useSettingsStore } from './settings';
-import { getToken, removeToken, setToken } from '@renderer/utils';
+import { getToken as getTokenByLs, removeToken, setToken } from '@renderer/utils';
 import router, { resetRouter } from '@renderer/router';
 import { login as loginServer, queryUserInfo } from '@renderer/services/user';
 
 export const useUserStore = defineStore('user', () => {
 	const userInfo = ref<any>({});
-	const token = ref<string>(getToken() || '');
+	const token = ref<string>(getTokenByLs());
 	const roles = ref<string[]>([]);
 	const username = ref<string>('');
 
@@ -74,6 +74,10 @@ export const useUserStore = defineStore('user', () => {
 			tagsViewStore.delAllVisitedViews();
 			tagsViewStore.delAllCachedViews();
 		}
+	};
+
+	const getToken = () => {
+		return token.value;
 	};
 
 	return { getToken, roles, username, setRoles, login, getInfo, changeRoles, logout, resetToken };

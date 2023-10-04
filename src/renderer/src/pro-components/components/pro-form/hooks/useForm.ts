@@ -1,14 +1,21 @@
-import { ref, toRaw, computed, nextTick } from 'vue';
-import type { ComputedRef, Ref } from 'vue';
-import type { FormProps, FormSchema } from '../src/form';
+import { ref, toRefs, toRaw, computed, nextTick, watch } from 'vue';
+import type { ComputedRef, Ref, SetupContext } from 'vue';
+import type { FormProps, FormSchema, FormEmits } from '../src/form';
 import { Form } from 'ant-design-vue';
 import { FormItemProps } from '../src/form-item';
 import { isFunction, omit } from 'lodash-es';
 // import { ProUpload } from '../../upload/index';
+import { componentsAlias } from '../src/componentAlias';
+import { isObject } from '@/utils';
 
-export function useForm(props: FormProps): {
+export function useForm(
+	props: FormProps,
+	emits: SetupContext<FormEmits>['emit']
+): {
 	propsRef: Ref;
 	modelRef: Ref<{ [key: string]: any }>;
+	injectQueue: Map<string, Record<string, any>>;
+	rootName: Ref;
 	schemasRef: Ref<FormSchema[]>;
 	getFormBind: ComputedRef<Omit<FormProps, 'schemas' | 'modal' | 'onSubmit'>>;
 	getFormItemBind: ComputedRef<(formItemProps: FormItemProps, field: string) => FormSchema & { [key: string]: any }>;
@@ -23,22 +30,39 @@ export function useForm(props: FormProps): {
 	validate: () => void;
 	validateField: (field: string) => void;
 	clearValidate: () => void;
+	getInterface: (name: string) => Promise<Record<string, any> | undefined>;
+	saveInjectInRoot: (name: string, injectQueueMap: Map<string, Record<string, any>>) => void;
 } {
 	const modelRef = ref({});
 	const rulesRef = ref({});
-	const propsRef = ref<FormProps>();
+	const propsRef = ref<FormProps>(props);
 	const formRef = ref();
 	const schemasRef = ref<FormSchema[]>([]);
+	let injectQueue: Map<string, Record<string, any>> = new Map();
+	const rootName = ref(props.rootName);
 
 	formRef.value = Form.useForm(modelRef, rulesRef);
+	const formItemContext = Form.useInjectFormItemContext();
 
 	nextTick(() => {
 		setProps(props);
 	});
 
+	watch(
+		() => modelRef.value,
+		(n) => {
+			if (props.name !== rootName.value) {
+				emits('update:value', toRaw(n));
+				formItemContext.onFieldChange();
+			}
+		},
+		{ deep: true }
+	);
+
 	const setProps = (props: FormProps) => {
 		// console.log('setProps', props)
 		propsRef.value = props;
+		rootName.value = propsRef.value?.rootName || propsRef.value?.name;
 		initSchemas();
 		initFormData();
 		getRules();
@@ -58,13 +82,47 @@ export function useForm(props: FormProps): {
 		if (isFunction(propsRef.value?.schemas)) {
 			schemasRef.value = propsRef.value?.schemas();
 		} else {
-			schemasRef.value = propsRef.value?.schemas;
+			// @ts-ignore
+			schemasRef.value = propsRef.value?.schemas.map((schema) => {
+				return coverEvent(schema);
+			});
 		}
 	};
 
+	const coverEvent = (object?: Record<string, any>) => {
+		if (!object) return;
+
+		const stack = [object];
+		while (stack.length > 0) {
+			const obj = stack.pop();
+			if (isObject(obj)) {
+				for (const key in obj) {
+					if (Object.prototype.hasOwnProperty.call(obj, key)) {
+						const val = obj[key];
+						if (isObject(val)) {
+							stack.push(val);
+						} else if (Array.isArray(val)) {
+							val.forEach((item) => {
+								if (isObject(item)) {
+									stack.push(item);
+								}
+							});
+						} else if (isFunction(val)) {
+							obj[key] = (...args) => {
+								return val(...args.filter((item) => !item.getInterface), { getInterface: formApi.getInterface });
+							};
+						}
+					}
+				}
+			}
+		}
+
+		return object;
+	};
+
 	const getFormBind = computed(() => {
-		if (!propsRef.value) return {};
-		return omit(propsRef.value, ['schemas', 'modal', 'onSubmit']);
+		if (!toRaw(propsRef.value)) return {};
+		return omit(toRaw(propsRef.value), ['schemas', 'modal', 'onSubmit']);
 	}) as ComputedRef<Omit<FormProps, 'schemas' | 'modal' | 'onSubmit'>>;
 
 	const getFormItemBind = computed(() => {
@@ -88,12 +146,8 @@ export function useForm(props: FormProps): {
 
 	// 获取表单类型
 	const getFormItemType: any = (type: FormSchema['type']) => {
-		if (!propsRef.value) return;
-		// if (propsRef.value.readonly) return 'FormText'
-		if (!type) return;
-
-		// if (type === 'upload') return ProUpload;
-		return `a-${type}`;
+		if (componentsAlias[type]) return componentsAlias[type];
+		return type;
 	};
 
 	// 获取表单校验规则
@@ -146,16 +200,21 @@ export function useForm(props: FormProps): {
 	};
 
 	// 提交
-	const submit = () => {
-		console.log('formRef', formRef.value);
-		console.log('rulesRef', rulesRef.value);
+	const submit = async () => {
+		// console.log('formRef', formRef.value);
+		// console.log('rulesRef', rulesRef.value);
+		// console.log('injectQueue', injectQueue);
 		return new Promise((resolve, reject) => {
-			formRef.value
-				.validate()
+			const promises: Promise<any>[] = [];
+			injectQueue.forEach((item) => {
+				promises.push(item.validate());
+			});
+
+			Promise.all(promises)
 				.then(() => {
 					resolve(toRaw(formRef.value.modelRef));
-					if (isFunction(propsRef.value?.onSubmit)) {
-						propsRef?.value?.onSubmit(toRaw(formRef.value.modelRef));
+					if (isFunction(propsRef.value.onSubmit)) {
+						propsRef.value.onSubmit(toRaw(formRef.value.modelRef));
 					}
 				})
 				.catch((err) => {
@@ -172,7 +231,16 @@ export function useForm(props: FormProps): {
 
 	// 校验
 	const validate = () => {
-		formRef.value.validate();
+		return new Promise((resolve, reject) => {
+			formRef.value
+				.validate()
+				.then((res) => {
+					resolve(res);
+				})
+				.catch((err) => {
+					reject(err);
+				});
+		});
 	};
 
 	// 单个校验
@@ -185,10 +253,60 @@ export function useForm(props: FormProps): {
 		formRef.value.clearValidate(names);
 	};
 
+	// 保存formApi在根form的injectQueue
+	const saveInjectInRoot = (name: string, injectQueueMap: Map<string, Record<string, any>>) => {
+		injectQueueMap && name && injectQueueMap.set(name, formApi);
+		injectQueue = injectQueueMap;
+	};
+
+	// 获取form实列formApi
+	const getInterface = (name: string): Promise<Record<string, any> | undefined> => {
+		return new Promise((resolve, reject) => {
+			nextTick(() => {
+				if (!name) {
+					console.error(`获取实例必须传 name`);
+					reject();
+					return;
+				}
+
+				if (props.name === name) {
+					resolve(formApi);
+					return;
+				}
+
+				if (!rootName.value) {
+					reject(`获取实例必须传 rootName`);
+					return;
+				}
+
+				resolve(injectQueue.get(name));
+			});
+		});
+	};
+
+	const formApi = {
+		modelRef,
+		formRef,
+		props: toRefs(props),
+		injectQueue,
+		setProps,
+		addField,
+		removeField,
+		submit,
+		reset,
+		validate,
+		validateField,
+		clearValidate,
+		getInterface,
+	};
+
 	// @ts-ignore
 	return {
 		propsRef,
 		modelRef,
+		rootName,
+		injectQueue,
+		// injectQueueKey,
 		schemasRef,
 		getFormBind,
 		getFormItemBind,
@@ -203,5 +321,7 @@ export function useForm(props: FormProps): {
 		validate,
 		validateField,
 		clearValidate,
+		getInterface,
+		saveInjectInRoot,
 	};
 }

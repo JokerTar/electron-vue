@@ -1,12 +1,8 @@
 import type { ExtractPropTypes, CSSProperties, VNode, PropType } from 'vue';
 import { formProps as antFormProps } from 'ant-design-vue/lib/form';
 import type { FormItemProps } from './form-item';
-import type { FormProps as AntFormProps } from 'ant-design-vue/lib/form';
-
-interface IExtra {
-	model?: AntFormProps['model'];
-	validateMessages?: AntFormProps['validateMessages'];
-}
+// import type { FormProps as AntFormProps } from 'ant-design-vue/lib/form';
+import { isObject } from '@/utils';
 
 export const formProps = {
 	...antFormProps(),
@@ -19,11 +15,17 @@ export const formProps = {
 	onSubmit: {
 		type: Function as PropType<(parms: any) => void>,
 	},
+	rootName: {
+		type: String,
+	},
 };
-export const formEmits = {};
+export const formEmits = {
+	'update:value': (val: Record<string, any>) => isObject(val),
+	register: (val: Record<string, any>) => isObject(val),
+};
 
 export type FormSchema = {
-	type?:
+	type:
 		| 'input'
 		| 'input-password'
 		| 'input-number'
@@ -42,8 +44,9 @@ export type FormSchema = {
 		| 'cascader'
 		| 'time-picker'
 		| 'range-picker'
-		| 'date-picker';
-	// | string
+		| 'date-picker'
+		| 'form'
+		| 'table';
 
 	field?: any;
 	slot?: string;
@@ -53,5 +56,5 @@ export type FormSchema = {
 	suffix?: string | VNode; // 后缀
 	style?: CSSProperties; // form-item ->
 };
-export type FormProps = Omit<ExtractPropTypes<typeof formProps>, 'model' | 'validateMessages'> & IExtra;
+export type FormProps = Partial<ExtractPropTypes<typeof formProps>>;
 export type FormEmits = typeof formEmits;
