@@ -6,6 +6,7 @@ import { isObject } from '@/utils';
 
 export const formProps = {
 	...antFormProps(),
+
 	formData: {
 		type: Object,
 	},

@@ -1,5 +1,5 @@
 <template>
-	<a-form-item :class="[ns.b(), props.type === 'form' ? 'pro-form-item-form' : '']" v-bind="props">
+	<a-form-item :class="[ns.b(), props.type === 'form' ? 'pro-form-item-form' : '', customClass]" v-bind="props">
 		<slot></slot>
 	</a-form-item>
 </template>

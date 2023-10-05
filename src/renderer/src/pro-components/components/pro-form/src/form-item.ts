@@ -9,6 +9,10 @@ export const formItemProps = {
 	type: {
 		type: String,
 	},
+
+	customClass: {
+		type: String,
+	},
 };
 
 interface IExtra {

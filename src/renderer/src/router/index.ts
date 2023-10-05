@@ -90,14 +90,6 @@ export const localRouters: Router[] = [
 					title: 'base',
 				},
 			},
-			{
-				path: 'base2',
-				name: 'pro-form-name2',
-				component: () => import('@renderer/views/pro-form/base.vue'),
-				meta: {
-					title: 'base',
-				},
-			},
 
 			{
 				path: 'base2',
