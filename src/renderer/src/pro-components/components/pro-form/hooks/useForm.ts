@@ -1,4 +1,4 @@
-import { ref, toRefs, toRaw, computed, nextTick, watch } from 'vue';
+import { ref, toRaw, computed, nextTick, watch } from 'vue';
 import type { ComputedRef, Ref, SetupContext } from 'vue';
 import type { FormProps, FormSchema, FormEmits } from '../src/form';
 import { Form } from 'ant-design-vue';
@@ -13,12 +13,12 @@ export function useForm(
 	emits: SetupContext<FormEmits>['emit']
 ): {
 	propsRef: Ref;
-	modelRef: Ref<{ [key: string]: any }>;
+	modelRef: Ref<Record<string, any>>;
 	injectQueue: Map<string, Record<string, any>>;
 	rootName: Ref;
 	schemasRef: Ref<FormSchema[]>;
 	getFormBind: ComputedRef<Omit<FormProps, 'schemas' | 'modal' | 'onSubmit'>>;
-	getFormItemBind: ComputedRef<(formItemProps: FormItemProps, field: string) => FormSchema & { [key: string]: any }>;
+	getFormItemBind: ComputedRef<(formItemProps: FormItemProps, field: string) => FormSchema & Record<string, any>>;
 	getModalBind: ComputedRef;
 	getFormItemType: ComputedRef;
 	getSlotName: (str: string) => string;
@@ -26,12 +26,13 @@ export function useForm(
 	addField: (schema: FormSchema) => void;
 	removeField: (field: string) => void;
 	submit: () => void;
-	reset: () => void;
+	reset: (flag: boolean) => void;
 	validate: () => void;
 	validateField: (field: string) => void;
 	clearValidate: () => void;
 	getInterface: (name: string) => Promise<Record<string, any> | undefined>;
 	saveInjectInRoot: (name: string, injectQueueMap: Map<string, Record<string, any>>) => void;
+	registerCom: (type: string, api: Record<string, any>) => void;
 } {
 	const modelRef = ref({});
 	const rulesRef = ref({});
@@ -40,12 +41,13 @@ export function useForm(
 	const schemasRef = ref<FormSchema[]>([]);
 	let injectQueue: Map<string, Record<string, any>> = new Map();
 	const rootName = ref(props.rootName);
+	const hasSetProps = ref(false);
 
 	formRef.value = Form.useForm(modelRef, rulesRef);
 	const formItemContext = Form.useInjectFormItemContext();
 
 	nextTick(() => {
-		setProps(props);
+		!hasSetProps.value && setProps(props);
 	});
 
 	watch(
@@ -60,7 +62,7 @@ export function useForm(
 	);
 
 	const setProps = (props: FormProps) => {
-		// console.log('setProps', props)
+		hasSetProps.value = true;
 		propsRef.value = props;
 		rootName.value = propsRef.value?.rootName || propsRef.value?.name;
 		initSchemas();
@@ -89,7 +91,8 @@ export function useForm(
 		}
 	};
 
-	const coverEvent = (object?: Record<string, any>) => {
+	// 混合方法
+	const coverEvent = (object: Record<string, any>, coverObj = { getInterface: formApi.getInterface }) => {
 		if (!object) return;
 
 		const stack = [object];
@@ -109,7 +112,7 @@ export function useForm(
 							});
 						} else if (isFunction(val)) {
 							obj[key] = (...args) => {
-								return val(...args.filter((item) => !item.getInterface), { getInterface: formApi.getInterface });
+								return val(...args.filter((item) => !item.getInterface), coverObj);
 							};
 						}
 					}
@@ -201,13 +204,13 @@ export function useForm(
 
 	// 提交
 	const submit = async () => {
-		// console.log('formRef', formRef.value);
-		// console.log('rulesRef', rulesRef.value);
-		// console.log('injectQueue', injectQueue);
 		return new Promise((resolve, reject) => {
 			const promises: Promise<any>[] = [];
 			injectQueue.forEach((item) => {
-				promises.push(item.validate());
+				if (item && !item.validate) {
+					console.error('表单组件统一检验必须实现 validate 方法');
+				}
+				if (item?.validate) promises.push(item?.validate());
 			});
 
 			Promise.all(promises)
@@ -224,9 +227,18 @@ export function useForm(
 	};
 
 	// 重置
-	const reset = () => {
+	const reset = async (flag: boolean) => {
 		initFormData();
 		formRef.value.resetFields();
+		if (flag) return;
+
+		injectQueue.forEach((item) => {
+			if (item.reset && isFunction(item.reset)) {
+				item.reset(true);
+			} else {
+				console.error(`${item?.props?.name} 表单组件统一重置必须实现 reset 方法`);
+			}
+		});
 	};
 
 	// 校验
@@ -284,11 +296,15 @@ export function useForm(
 		});
 	};
 
+	const registerCom = (type, api: Record<string, any>) => {
+		console.log('register - api', type, api);
+	};
+
 	const formApi = {
 		modelRef,
 		formRef,
-		props: toRefs(props),
-		injectQueue,
+		rulesRef,
+		props: toRaw(props),
 		setProps,
 		addField,
 		removeField,
@@ -298,7 +314,10 @@ export function useForm(
 		validateField,
 		clearValidate,
 		getInterface,
+		initFormData,
 	};
+
+	emits('register', formApi);
 
 	// @ts-ignore
 	return {
@@ -323,5 +342,6 @@ export function useForm(
 		clearValidate,
 		getInterface,
 		saveInjectInRoot,
+		registerCom,
 	};
 }

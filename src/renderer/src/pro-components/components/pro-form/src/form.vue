@@ -1,7 +1,7 @@
 <template>
 	<a-form :modal="modelRef" v-bind="getFormBind" :class="[ns.b()]">
 		<template v-for="schema in schemasRef" :key="schema">
-			<FormItem v-bind="getFormItemBind(schema.formItemProps || {}, schema.field)">
+			<FormItem v-bind="getFormItemBind(schema.formItemProps || {}, schema.field)" :type="schema.type">
 				<component
 					:is="getFormItemType(schema.type)"
 					v-model:[getModalBind(getFormItemType(schema.type))]="modelRef[schema.field]"
@@ -63,12 +63,6 @@ const formApi = {
 	clearValidate,
 	getInterface,
 };
-
-emits('register', {
-	modelRef,
-	props,
-	...formApi,
-});
 
 let injectQueueMap;
 if (props.name && props.name === rootName.value) {

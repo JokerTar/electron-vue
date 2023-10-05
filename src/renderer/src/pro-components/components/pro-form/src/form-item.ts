@@ -5,6 +5,10 @@ import { formItemProps as antFormItemProps } from 'ant-design-vue/lib/form';
 
 export const formItemProps = {
 	...antFormItemProps(),
+
+	type: {
+		type: String,
+	},
 };
 
 interface IExtra {
