@@ -5,12 +5,21 @@
 		<a-button @click="reset">reset</a-button>
 
 		<ProTable @register="registerTable"></ProTable>
+
+		<a-button @click="open">open modal</a-button>
+
+		<ProModal @register="registerModal" :closable="true" title="aaa" height="200px">
+			ssss
+			<!-- <template #title>xxx</template> -->
+			<template #extra>extra</template>
+
+			<template #cancelText>abc</template>
+		</ProModal>
 	</div>
 </template>
 <script lang="ts" setup>
 // import { ref } from 'vue';
-import { useProForm } from '@renderer/pro-components';
-import { useProTable } from '@renderer/pro-components';
+import { useProForm, useProTable, useProModal } from '@renderer/pro-components';
 import type { FormProps, TableProps } from '@renderer/pro-components';
 const [register, { submit, reset }] = useProForm({
 	name: 'f1',
@@ -152,5 +161,51 @@ const [registerTable] = useProTable({
 			],
 		},
 	],
+});
+
+const [registerModal, { open }] = useProModal({
+	title: 'modal title',
+	tabs: {
+		// type: 'card',
+		tabPosition: 'left',
+		tabsPane: [
+			{
+				tab: 'a',
+				tabKey: '1',
+			},
+			{
+				tab: 'b',
+				tabKey: '2',
+			},
+			{
+				tab: 'c',
+				tabKey: '3',
+			},
+			{
+				tab: 'd',
+				tabKey: '4',
+			},
+			{
+				tab: 'e',
+				tabKey: '5',
+			},
+			{
+				tab: 'f',
+				tabKey: '6',
+			},
+			{
+				tab: 'g',
+				tabKey: '7',
+			},
+			{
+				tab: 'h',
+				tabKey: '8',
+			},
+			{
+				tab: 'p',
+				tabKey: '9',
+			},
+		],
+	},
 });
 </script>

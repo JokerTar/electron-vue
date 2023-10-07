@@ -1,55 +1,78 @@
 <template>
-	<a-modal v-model:visible="visible" :class="[ns.b()]" v-bind="getBind" @ok="close" @cancel="close">
-		<div :class="[ns.em('body')]">
-			<div :class="[ns.em('header')]">
-				<div :class="[ns.em('header-wrap')]">
-					<div :class="[ns.em('header-wrap-title')]">
-						<a-button v-if="closable" :class="['ant-drawer-close']" @click="close">
-							<close-outlined />
-						</a-button>
-						<div class="ant-drawer-title">{{ title }}</div>
+	<a-modal
+		v-bind="getBind"
+		v-model:visible="visible"
+		:class="[
+			ns.b(),
+			tabs && (tabs?.tabPosition == 'top' || !tabs?.tabPosition) ? 'has-top-tabs' : '',
+			tabs && (tabs?.tabPosition == 'left' || tabs?.tabPosition == 'right') ? 'has-content-tabs' : '',
+		]"
+		:wrap-class-name="fullModal"
+		@ok="close"
+		@cancel="close"
+		:wrap-style="{ overflow: 'hidden' }"
+		:closable="false"
+	>
+		<!-- header -->
+		<template #title>
+			<div>
+				<div :class="[ns.m('header')]" ref="modalTitleRef">
+					<div :class="[ns.m('header-wrap')]">
+						<div :class="['ant-drawer-title']">
+							<slot name="title">{{ title }}</slot>
+						</div>
+						<div :class="['ant-drawer-extra']">
+							<slot name="extra"></slot>
+						</div>
 					</div>
-					<div class="ant-drawer-extra">
-						<slot name="extra"></slot>
+
+					<div>
+						<a-button v-if="!isFull" type="text" @click="targetFullModal" initial size="small">
+							<template #icon><FullscreenOutlined /></template>
+						</a-button>
+
+						<a-button v-else type="text" @click="targetFullModal" initial size="small">
+							<template #icon><FullscreenExitOutlined /></template>
+						</a-button>
+
+						<a-divider type="vertical" />
+
+						<a-button type="text" v-if="closable" initial size="small">
+							<template #icon><CloseOutlined /></template>
+						</a-button>
 					</div>
 				</div>
+
 				<div v-if="tabs && (tabs?.tabPosition == 'top' || !tabs?.tabPosition)" :class="[ns.em('header-tabs')]" style="width: 100%">
 					<a-tabs v-model:activeKey="activeKey" v-bind="getTabsBind" @change="tabsChange">
-						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.key" :tab="item.key" />
+						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 					</a-tabs>
 				</div>
 			</div>
+		</template>
 
-			<div :class="[ns.em('content')]">
-				<div
-					v-if="tabs?.tabPosition === 'left' || tabs?.tabPosition === 'right'"
-					:class="[ns.em('left-tabs')]"
-					style="position: relative; top: 0; bottom: 0"
-				>
+		<!-- content -->
+		<template #default>
+			<div :class="[ns.m('content'), tabs && tabs?.tabPosition == 'right' ? 'row-reverse' : '']">
+				<div v-if="tabs?.tabPosition === 'left' || tabs?.tabPosition === 'right'" :class="[ns.m('content-tabs')]">
 					<a-tabs v-model:activeKey="activeKey" :tab-position="tabs?.tabPosition" v-bind="getTabsBind" style="height: 100%" @change="tabsChange">
-						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.key" :tab="item.key" />
+						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 					</a-tabs>
 				</div>
-				<div :class="[ns.em('content-wrap')]">
-					<!-- <slot></slot> -->
-					<component :is="$slots.default" v-if="$slots.default">
-						<template v-for="slot in Object.keys($slots)" #[slot]="record" :key="slot">
-							<slot :name="slot" v-bind="record || {}"></slot>
-						</template>
-					</component>
-
-					<!-- <slot name="content"></slot> -->
-					<component :is="$slots.content" v-if="$slots.content">
-						<template v-for="slot in Object.keys($slots)" #[slot]="record" :key="slot">
-							<slot :name="slot" v-bind="record"></slot>
-						</template>
-					</component>
+				<div :class="[ns.m('content-wrap')]">
+					<slot></slot>
 				</div>
 			</div>
-		</div>
+		</template>
 
-		<template v-for="slot in Object.keys($slots)" #[slot]="record" :key="slot">
+		<template v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default'].includes(slotNama))" #[slot]="record" :key="slot">
 			<slot :name="slot" v-bind="record || {}"></slot>
+		</template>
+
+		<template #modalRender="{ originVNode }">
+			<div :style="isFull ? { background: 'unset' } : transformStyle">
+				<component :is="originVNode" />
+			</div>
 		</template>
 	</a-modal>
 </template>
@@ -57,11 +80,112 @@
 <script lang="ts" setup>
 import { modalProps, modalEmits } from './modal';
 import { useModal, useModalStyle } from '../hooks';
+import { CloseOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue';
 
 const props = defineProps(modalProps);
 const emits = defineEmits(modalEmits);
 
-const { visible, activeKey, getBind, getTabsBind, close, tabsChange } = useModal(props, emits);
+const { visible, activeKey, getBind, getTabsBind, isFull, fullModal, close, tabsChange, targetFullModal } = useModal(props, emits);
 
-const { ns } = useModalStyle();
+const { ns, modalTitleRef, transformStyle } = useModalStyle();
 </script>
+
+<script lang="ts">
+export default {
+	options: {
+		styleIsolation: 'shared',
+	},
+};
+</script>
+
+<style lang="less">
+.pro-modal {
+	background: unset;
+
+	&.has-top-tabs {
+		background: unset;
+
+		.ant-modal-header {
+			padding: 0;
+
+			// .pro-modal--header {
+			// 	width: 100%;
+			// 	padding: 16px 24px;
+			// }
+
+			// .ant-tabs {
+			// 	position: relative;
+			// 	top: 1px;
+
+			// 	> .ant-tabs-nav {
+			// 		margin-bottom: 0;
+			// 		padding: 0 24px;
+			// 	}
+			// }
+		}
+	}
+
+	&.has-content-tabs {
+		background: unset;
+
+		.ant-modal-body {
+			padding: 0;
+
+			// .pro-modal--content {
+			// 	display: flex;
+			// 	height: 100%;
+
+			// 	&.row-reverse {
+			// 		flex-direction: row-reverse;
+			// 	}
+
+			// 	&-wrap {
+			// 		flex: auto;
+			// 		padding: 24px;
+			// 	}
+
+			// 	&-tabs {
+			// 		height: 100%;
+			// 	}
+			// }
+		}
+	}
+
+	&--header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		cursor: move;
+
+		&-wrap {
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+
+			> .ant-drawer-title {
+				flex: unset;
+			}
+		}
+	}
+}
+
+.full-modal {
+	.ant-modal {
+		top: 0;
+		padding-bottom: 0;
+		margin: 0;
+		width: 100% !important;
+		max-width: 100%;
+
+		.ant-modal-content {
+			display: flex;
+			flex-direction: column;
+			height: 100vh;
+
+			.ant-modal-body {
+				flex: 1;
+			}
+		}
+	}
+}
+</style>
