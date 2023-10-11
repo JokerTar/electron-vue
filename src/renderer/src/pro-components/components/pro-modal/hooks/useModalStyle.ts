@@ -2,6 +2,7 @@ import { ref, watch, watchEffect, computed } from 'vue';
 import type { CSSProperties } from 'vue';
 import { useNamespace } from '../../../hooks';
 import { useDraggable } from '@vueuse/core';
+import { isNumber, isString } from '@/utils';
 
 export function useModalStyle() {
 	const ns = useNamespace('modal');
@@ -49,9 +50,18 @@ export function useModalStyle() {
 		};
 	});
 
+	const calculatedValue = computed(() => {
+		return (val: string | number) => {
+			if (isString(val)) return val;
+			if (isNumber(val)) return `${val}px`;
+			return '';
+		};
+	});
+
 	return {
 		ns,
 		modalTitleRef,
 		transformStyle,
+		calculatedValue,
 	};
 }

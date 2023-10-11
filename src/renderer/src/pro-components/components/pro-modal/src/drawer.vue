@@ -1,17 +1,18 @@
 <template>
-	<a-modal
+	<a-drawer
 		v-bind="getBind"
 		v-model:visible="visible"
 		:class="[
 			ns.b(),
 			tabs && (tabs?.tabPosition == 'top' || !tabs?.tabPosition) ? 'has-top-tabs' : '',
 			tabs && (tabs?.tabPosition == 'left' || tabs?.tabPosition == 'right') ? 'has-content-tabs' : '',
+			fullModal,
 		]"
-		:wrap-class-name="fullModal"
 		@ok="close"
 		@cancel="close"
-		:wrap-style="{ overflow: 'hidden' }"
+		:style="{ overflow: 'hidden' }"
 		:closable="false"
+		:width="width"
 	>
 		<!-- header -->
 		<template #title>
@@ -43,7 +44,7 @@
 					</div>
 				</div>
 
-				<div v-if="tabs && (tabs?.tabPosition == 'top' || !tabs?.tabPosition)" :class="[ns.em('header-tabs')]" style="width: 100%">
+				<div v-if="tabs && (tabs?.tabPosition == 'top' || !tabs?.tabPosition)" :class="[ns.em('header-tabs')]">
 					<a-tabs v-model:activeKey="activeKey" v-bind="getTabsBind" :style="{ width: calculatedValue(isFull ? '100%' : width) }">
 						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 
@@ -80,35 +81,25 @@
 			</div>
 		</template>
 
-		<template
-			v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default', ...tabsSlots].includes(slotNama))"
-			#[slot]="record"
-			:key="slot"
-		>
+		<template v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default'].includes(slotNama))" #[slot]="record" :key="slot">
 			<slot :name="slot" v-bind="record || {}"></slot>
 		</template>
-
-		<template #modalRender="{ originVNode }">
-			<div :style="isFull ? { background: 'unset' } : transformStyle">
-				<component :is="originVNode" />
-			</div>
-		</template>
-	</a-modal>
+	</a-drawer>
 </template>
 
 <script lang="ts" setup>
-import { modalProps, modalEmits } from './modal';
+import { drawerProps, drawerEmits } from './drawer';
 import { useModal, useModalStyle } from '../hooks';
 import { CloseOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue';
 import Content from './components/content.vue';
 
-const props = defineProps(modalProps);
-const emits = defineEmits(modalEmits);
+const props = defineProps(drawerProps);
+const emits = defineEmits(drawerEmits);
 
 const { visible, activeKey, getBind, getTabsBind, isFull, fullModal, close, targetFullModal, getTabsChildren, getTabsPaneChildren, tabsSlots } =
 	useModal(props, emits);
 
-const { ns, modalTitleRef, transformStyle, calculatedValue } = useModalStyle();
+const { ns, modalTitleRef, calculatedValue } = useModalStyle();
 </script>
 
 <script lang="ts">
@@ -126,7 +117,7 @@ export default {
 	&.has-top-tabs {
 		background: unset;
 
-		.ant-modal-header {
+		.ant-drawer-header {
 			padding: 0;
 
 			.pro-modal--header {
@@ -188,10 +179,20 @@ export default {
 			}
 		}
 	}
+
+	&--content {
+		display: flex;
+		height: 100%;
+
+		&-wrap {
+			flex: 1;
+			height: 100%;
+		}
+	}
 }
 
 .full-modal {
-	.ant-modal {
+	.ant-drawer-content-wrapper {
 		max-width: 100%;
 		width: 100% !important;
 		top: 0;

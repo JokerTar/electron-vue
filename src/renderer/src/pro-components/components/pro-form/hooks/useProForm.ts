@@ -2,7 +2,7 @@ import { ref, toRaw } from 'vue';
 import type { FormProps, FormSchema } from '../src/form.js';
 import { merge } from 'lodash-es';
 
-export function useProForm(props: FormProps): [
+export function useProForm(props?: FormProps): [
 	register: (key: any) => void,
 	methods: {
 		setProps: (props: FormProps) => void;
@@ -19,11 +19,11 @@ export function useProForm(props: FormProps): [
 
 	const register = (api) => {
 		formApi.value = api;
-		setProps(toRaw(api.props));
+		props && setProps(toRaw(api.props));
 	};
 
 	const setProps = (registerProps: FormProps) => {
-		formApi.value.setProps(merge(registerProps, props));
+		formApi.value?.setProps(merge(registerProps, props));
 	};
 
 	const submit = () => {

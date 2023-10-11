@@ -1,12 +1,19 @@
 import { ref } from 'vue';
 import type { ModalProps } from '../src/modal';
 
-export function useProModal(props: ModalProps) {
+export function useProModal(props?: ModalProps): [
+	register: (key: any) => void,
+	methods: {
+		setProps: (props: ModalProps) => void;
+		open: () => void;
+		close: () => void;
+	},
+] {
 	const modalApi = ref();
 
 	const register = (api) => {
 		modalApi.value = api;
-		setProps(props);
+		props && setProps(props);
 	};
 
 	const setProps = (props: ModalProps) => {

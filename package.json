@@ -96,11 +96,9 @@
 		],
 		"*.vue": [
 			"eslint --fix",
-			"prettier --write",
-			"stylelint --fix"
+			"prettier --write"
 		],
 		"*.{less,html}": [
-			"stylelint --fix",
 			"prettier --write"
 		],
 		"*.md": [

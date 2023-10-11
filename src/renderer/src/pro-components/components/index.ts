@@ -1,6 +1,7 @@
 export * from './pro-card';
 export * from './pro-descriptions';
 export * from './pro-form';
+export * from './pro-modal-form';
 export * from './pro-list';
 export * from './pro-modal';
 export * from './pro-table';

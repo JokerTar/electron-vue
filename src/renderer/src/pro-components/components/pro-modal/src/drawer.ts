@@ -1,12 +1,12 @@
 import type { ExtractPropTypes, PropType } from 'vue';
 // import { tabs as antTabsProps } from 'ant-design-vue/lib/tabs';
 import type { TabsProps } from 'ant-design-vue/lib/tabs';
-import { modalProps as antModalProps } from 'ant-design-vue/lib/modal/Modal';
+import { drawerProps as antDrawerProps } from 'ant-design-vue/lib/drawer';
 import { isObject } from '@/utils';
 import type { ITabsPane } from './types';
 
-export const modalProps = {
-	...antModalProps(),
+export const drawerProps = {
+	...antDrawerProps(),
 
 	closable: {
 		type: Boolean,
@@ -23,9 +23,9 @@ export const modalProps = {
 	},
 };
 
-export const modalEmits = {
+export const drawerEmits = {
 	register: (val: Record<string, any>) => isObject(val),
 };
 
-export type ModalProps = Partial<ExtractPropTypes<typeof modalProps>>;
-export type ModalEmits = typeof modalEmits;
+export type DrawerProps = Partial<ExtractPropTypes<typeof drawerProps>>;
+export type DrawerEmits = typeof drawerEmits;

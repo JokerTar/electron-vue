@@ -40,7 +40,7 @@ export function useForm(
 	const formRef = ref();
 	const schemasRef = ref<FormSchema[]>([]);
 	let injectQueue: Map<string, Record<string, any>> = new Map();
-	const rootName = ref(props.rootName);
+	const rootName = ref(props.rootName || props.name);
 	const hasSetProps = ref(false);
 
 	formRef.value = Form.useForm(modelRef, rulesRef);

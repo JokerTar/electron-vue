@@ -69,7 +69,7 @@ if (props.name && props.name === rootName.value) {
 	saveInjectInRoot(props.name, formApi.injectQueue);
 	provide(rootName.value, formApi.injectQueue);
 	injectQueueMap = formApi.injectQueue;
-} else {
+} else if (rootName.value) {
 	injectQueueMap = inject(rootName.value);
 }
 

@@ -1,19 +1,18 @@
 import { ref, computed, toRaw } from 'vue';
 import type { SetupContext } from 'vue';
 import type { ModalProps, ModalEmits } from '../src/modal';
-import { assign, omit, pick } from 'lodash-es';
+import { assign, omit } from 'lodash-es';
 
 export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emit']) {
 	const visible = ref(false);
-	const activeKey = ref();
+	const activeKey = ref(props?.tabs?.value || props?.tabs?.tabsPane?.[0].tabKey);
 	const propsRef = ref(props);
 	const isFull = ref(false);
-
-	console.log(props);
-	console.log(emits);
+	const tabsSlots = ['addIcon', 'leftExtra', 'moreIcon', 'renderTabBar', 'rightExtra'];
 
 	const setProps = (props: ModalProps) => {
 		propsRef.value = assign(toRaw(propsRef.value), props);
+		activeKey.value = props?.tabs?.value || props?.tabs?.tabsPane?.[0].tabKey;
 	};
 
 	const getBind = computed(() => {
@@ -21,7 +20,6 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 	});
 
 	const getTabsBind = computed(() => {
-		console.log('tabs', omit(pick(propsRef.value, ['tabs']), 'tabsPane'));
 		return omit(propsRef.value.tabs, 'tabsPane');
 	});
 
@@ -48,6 +46,18 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		isFull.value = !isFull.value;
 	};
 
+	const getTabsPaneChildren = computed(() => {
+		const { tabs } = propsRef.value;
+		const item = tabs?.tabsPane?.find((item) => item.tabKey === activeKey.value)?.children;
+		return item || {};
+	});
+
+	const getTabsChildren = computed(() => {
+		const { tabs } = propsRef.value;
+
+		return tabs?.children;
+	});
+
 	const api = {
 		setProps,
 		close,
@@ -63,6 +73,9 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		getTabsBind,
 		fullModal,
 		isFull,
+		getTabsChildren,
+		getTabsPaneChildren,
+		tabsSlots,
 		tabsChange,
 		close,
 		open,
