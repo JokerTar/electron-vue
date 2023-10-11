@@ -16,6 +16,7 @@ module.exports = {
 	configBasedir: '.',
 	ignoreFiles: ['**/*.js', '**/*.jsx', '**/*.tsx', '**/*.ts', '**/*.json', '**/*.md', '**/*.yaml'],
 	rules: {
+		'selector-class-pattern': null,
 		'no-descending-specificity': null, // 禁止在具有较高优先级的选择器后出现被其覆盖的较低优先级的选择器
 		// 如果是小程序允许rpx
 		'unit-no-unknown': [true, { ignoreUnits: ['rpx'] }],

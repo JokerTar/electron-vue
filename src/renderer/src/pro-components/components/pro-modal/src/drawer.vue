@@ -121,8 +121,8 @@ export default {
 			padding: 0;
 
 			.pro-modal--header {
-				width: 100%;
 				padding: 16px 24px;
+				width: 100%;
 			}
 
 			.ant-tabs {
@@ -130,8 +130,8 @@ export default {
 				top: 1px;
 
 				> .ant-tabs-nav {
-					margin-bottom: 0;
 					padding: 0 24px;
+					margin-bottom: 0;
 				}
 			}
 		}
@@ -164,10 +164,10 @@ export default {
 	}
 
 	&--header {
-		cursor: move;
 		display: flex;
-		align-items: center;
 		justify-content: space-between;
+		align-items: center;
+		cursor: move;
 
 		&-wrap {
 			display: flex;
@@ -193,11 +193,11 @@ export default {
 
 .full-modal {
 	.ant-drawer-content-wrapper {
-		max-width: 100%;
-		width: 100% !important;
 		top: 0;
 		padding-bottom: 0;
 		margin: 0;
+		width: 100% !important;
+		max-width: 100%;
 
 		.ant-modal-content {
 			display: flex;
