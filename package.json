@@ -22,9 +22,7 @@
 		"pre": "npm install --registry https://registry.npm.taobao.org",
 		"clean:cache": "rimraf node_modules/.cache/ && rimraf node_modules/.vite",
 		"reinstall": "rimraf package.lock.json && rimraf node_modules && npm run pre",
-		"lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix",
-		"lintcss": "stylelint src/**/*.{css,scss} --fix",
-		"lint:eslint": "eslint --fix --ext .js,.ts,.vue ./src",
+		"lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue ./src/renderer --fix",
 		"lint:format": "prettier --write --loglevel warn \"src/**/*.{js,ts,json,tsx,css,less,vue,html,md}\"",
 		"lint:style": "stylelint --fix \"**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
 		"lint:lint-staged": "lint-staged -c ./.husky/lintstagedrc.js"
