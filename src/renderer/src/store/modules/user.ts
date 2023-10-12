@@ -80,7 +80,17 @@ export const useUserStore = defineStore('user', () => {
 		return token.value;
 	};
 
-	return { getToken, roles, username, setRoles, login, getInfo, changeRoles, logout, resetToken };
+	return {
+		getToken,
+		roles,
+		username,
+		setRoles,
+		login,
+		getInfo,
+		changeRoles,
+		logout,
+		resetToken,
+	};
 });
 
 /** 在 setup 外使用 */

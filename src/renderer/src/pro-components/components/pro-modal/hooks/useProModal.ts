@@ -17,7 +17,7 @@ export function useProModal(props?: ModalProps): [
 	};
 
 	const setProps = (props: ModalProps) => {
-		modalApi.value.setProps(props);
+		modalApi.value?.setProps(props);
 	};
 
 	const open = () => {

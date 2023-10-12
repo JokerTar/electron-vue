@@ -92,6 +92,12 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		formRef.value.resetFields();
 	};
 
+	// 重置
+	const clearValidate = async () => {
+		// initFormData();
+		formRef.value.clearValidate();
+	};
+
 	// 监听列表表单输入变化
 	const EventChange = () => {
 		updateValue();
@@ -140,6 +146,7 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		getInterface,
 		validate,
 		reset,
+		clearValidate,
 	};
 
 	emits('register', tableApi);

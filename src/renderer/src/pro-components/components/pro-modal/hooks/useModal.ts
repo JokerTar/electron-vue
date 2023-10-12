@@ -2,6 +2,7 @@ import { ref, computed, toRaw } from 'vue';
 import type { SetupContext } from 'vue';
 import type { ModalProps, ModalEmits } from '../src/modal';
 import { assign, omit } from 'lodash-es';
+import { isFunction } from '@/utils';
 
 export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emit']) {
 	const visible = ref(false);
@@ -29,6 +30,18 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		return '';
 	});
 
+	const getTabsPaneChildren = computed(() => {
+		const { tabs } = propsRef.value;
+		const item = tabs?.tabsPane?.find((item) => item.tabKey === activeKey.value)?.children;
+		return item || {};
+	});
+
+	const getTabsChildren = computed(() => {
+		const { tabs } = propsRef.value;
+
+		return tabs?.children;
+	});
+
 	const close = () => {
 		visible.value = false;
 	};
@@ -46,17 +59,23 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		isFull.value = !isFull.value;
 	};
 
-	const getTabsPaneChildren = computed(() => {
-		const { tabs } = propsRef.value;
-		const item = tabs?.tabsPane?.find((item) => item.tabKey === activeKey.value)?.children;
-		return item || {};
-	});
+	const EventOk = async () => {
+		if (props.okFn && isFunction(props.okFn)) {
+			await props.okFn();
+			close();
+		} else {
+			close();
+		}
+	};
 
-	const getTabsChildren = computed(() => {
-		const { tabs } = propsRef.value;
-
-		return tabs?.children;
-	});
+	const EventCancel = async () => {
+		if (props.cancelFn && isFunction(props.cancelFn)) {
+			await props.cancelFn();
+			close();
+		} else {
+			close();
+		}
+	};
 
 	const api = {
 		setProps,
@@ -80,5 +99,7 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		close,
 		open,
 		targetFullModal,
+		EventOk,
+		EventCancel,
 	};
 }

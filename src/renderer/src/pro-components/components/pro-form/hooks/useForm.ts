@@ -29,7 +29,7 @@ export function useForm(
 	reset: (flag: boolean) => void;
 	validate: () => void;
 	validateField: (field: string) => void;
-	clearValidate: () => void;
+	clearValidate: (flag: boolean) => void;
 	getInterface: (name: string) => Promise<Record<string, any> | undefined>;
 	saveInjectInRoot: (name: string, injectQueueMap: Map<string, Record<string, any>>) => void;
 	registerCom: (type: string, api: Record<string, any>) => void;
@@ -208,7 +208,7 @@ export function useForm(
 			const promises: Promise<any>[] = [];
 			injectQueue.forEach((item) => {
 				if (item && !item.validate) {
-					console.error('表单组件统一检验必须实现 validate 方法');
+					console.error(`${item?.props?.name} 表单组件统一检验必须实现 validate 方法`);
 				}
 				if (item?.validate) promises.push(item?.validate());
 			});
@@ -261,8 +261,17 @@ export function useForm(
 	};
 
 	// 清空校验
-	const clearValidate = (names?: string[]) => {
-		formRef.value.clearValidate(names);
+	const clearValidate = (flag: boolean) => {
+		formRef.value.clearValidate();
+		if (flag) return;
+
+		injectQueue.forEach((item) => {
+			if (item.clearValidate && isFunction(item.clearValidate)) {
+				item.clearValidate(true);
+			} else {
+				console.error(`${item?.props?.name} 表单组件统一重置必须实现 clearValidate 方法`);
+			}
+		});
 	};
 
 	// 保存formApi在根form的injectQueue

@@ -36,7 +36,12 @@ const user = ref();
 const handleLogin = async () => {
 	const params: Record<string, any> = {};
 	console.log(params);
-	await login({ username: '15712139076', password: '12345678', captcha: 'esse', key: 'in exercitation' });
+	await login({
+		username: '15712139076',
+		password: '12345678',
+		captcha: 'esse',
+		key: 'in exercitation',
+	});
 	await getInfo();
 	router.push(homePath);
 };

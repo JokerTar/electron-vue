@@ -44,7 +44,12 @@ export function useFetch(props: FetchConfig | string): IResponse {
 				if (fetchQueryData === false) return;
 			}
 
-			result = await request.request({ url, method, data: fetchQueryData, params });
+			result = await request.request({
+				url,
+				method,
+				data: fetchQueryData,
+				params,
+			});
 
 			result = getPath ? get(result, getPath) : result;
 

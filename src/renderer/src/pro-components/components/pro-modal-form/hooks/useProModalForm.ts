@@ -1,21 +1,26 @@
 import { ref, nextTick } from 'vue';
 import type { FormProps, FormSchema } from '../../pro-form/src/form.js';
-import type { ModalProps } from '../../pro-modal/src/modal.js';
-import { merge } from 'lodash-es';
+// import type { ModalProps } from '../../pro-modal/src/modal.js';
+import type { ModalFormProps } from '../src/modal-form.js';
+import { merge, omit } from 'lodash-es';
 
-export function useProModalForm(props: FormProps) {
+export function useProModalForm(props: ModalFormProps) {
 	const modalApi = ref();
 	const formApi = ref();
+	const modalFormApi = ref();
 
 	const register = (api) => {
 		console.log(api);
 		modalApi.value = api.modalApi;
 		formApi.value = api.formApi;
-		setFormProps(props);
+		modalFormApi.value = api;
+		setFormProps(omit(props, ['title', 'type', 'modalProps']));
+		setModalProps({ ...props?.modalProps, title: props.title });
+		api.setModalFormType(props.type);
 	};
 
-	const setModalProps = (props: ModalProps) => {
-		modalApi.value.setProps(props);
+	const setModalProps = (props: ModalFormProps) => {
+		modalFormApi.value.setModalProps(props);
 	};
 
 	const open = () => {
@@ -62,5 +67,20 @@ export function useProModalForm(props: FormProps) {
 		formApi.value.clearValidate(names);
 	};
 
-	return [register, { setModalProps, setFormProps, open, close, addField, removeField, submit, reset, validate, validateField, clearValidate }];
+	return [
+		register,
+		{
+			setModalProps,
+			setFormProps,
+			open,
+			close,
+			addField,
+			removeField,
+			submit,
+			reset,
+			validate,
+			validateField,
+			clearValidate,
+		},
+	];
 }

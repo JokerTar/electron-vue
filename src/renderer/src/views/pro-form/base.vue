@@ -1,3 +1,12 @@
+<!--
+ * @Author: TRF
+ * @Date: 2023-09-18 16:40:17
+ * @LastEditors: TRF
+ * @LastEditTime: 2023-10-12 15:18:59
+ * @FilePath: \electron-vue\src\renderer\src\views\pro-form\base.vue
+ * @Description:
+ *
+-->
 <template>
 	<div>
 		<ProForm @register="register" />
@@ -345,118 +354,265 @@ const [registerDrawer, { open: openDrawer }] = useProModal({
 });
 
 const [registerModalForm, { open: openModalForm }] = useProModalForm({
-	name: 'f1',
-	// layout: 'inline',
-	schemas: [
-		{
-			type: 'input',
-			field: 'a',
-			formItemProps: {
-				label: 'a11',
-				required: true,
-				// rules: [],
-			},
-			props: {
-				onClick(...args) {
-					console.log(args);
-				},
-			},
-		},
-		{
-			type: 'form',
-			field: 'form2',
-			formItemProps: {
-				label: 'form2',
-			},
-			props: {
-				name: 'f2',
-				labelCol: { style: { width: '100px' } },
-				schemas: [
-					{
-						type: 'input',
-						field: 'a22',
-						formItemProps: {
-							label: 'a22',
-						},
-					},
-
-					{
-						type: 'form',
-						field: 'form3',
-						formItemProps: {
-							label: 'form3',
-						},
-						props: {
-							name: 'f3',
-							labelCol: { style: { width: '100px' } },
-							schemas: [
-								{
-									type: 'input',
-									field: 'a33',
-									formItemProps: {
-										label: 'a33',
-										required: true,
-									},
-									props: {
-										async onClick(...args) {
-											console.log('a33', args);
-											const f1 = await args[1].getInterface('f1');
-											console.log('f1', f1);
-										},
+	modalProps: {
+		title: 'modal form title 2',
+		tabs: {
+			type: 'card',
+			tabsPane: [
+				{
+					tab: 'form-1',
+					tabKey: '1',
+					children: {
+						name: 'f1',
+						// layout: 'inline',
+						schemas: [
+							{
+								type: 'input',
+								field: 'a',
+								formItemProps: {
+									label: 'a11',
+									required: true,
+									// rules: [],
+								},
+								props: {
+									onClick(...args) {
+										console.log(args);
 									},
 								},
-							],
-						} as FormProps,
-					},
-				],
-			} as FormProps,
-		},
-
-		{
-			type: 'table',
-			field: 'table',
-			formItemProps: {
-				label: 'table',
-			},
-			props: {
-				name: 'table',
-				dataSource: [
-					{
-						name: '123',
-					},
-				],
-				columns: [
-					{
-						title: '姓名',
-						dataIndex: 'name',
-					},
-					{
-						title: '年龄',
-						dataIndex: 'age',
-						type: 'input',
-						rules: [
+							},
 							{
-								required: true,
-								message: '地址是必填项，长度不能超过4',
-								max: 4,
+								type: 'form',
+								field: 'form2',
+								formItemProps: {
+									label: 'form2',
+								},
+								props: {
+									name: 'f2',
+									labelCol: { style: { width: '100px' } },
+									schemas: [
+										{
+											type: 'input',
+											field: 'a22',
+											formItemProps: {
+												label: 'a22',
+											},
+										},
+
+										{
+											type: 'form',
+											field: 'form3',
+											formItemProps: {
+												label: 'form3',
+											},
+											props: {
+												name: 'f3',
+												labelCol: { style: { width: '100px' } },
+												schemas: [
+													{
+														type: 'input',
+														field: 'a33',
+														formItemProps: {
+															label: 'a33',
+															required: true,
+														},
+														props: {
+															async onClick(...args) {
+																console.log('a33', args);
+																const f1 = await args[1].getInterface('f1');
+																console.log('f1', f1);
+															},
+														},
+													},
+												],
+											} as FormProps,
+										},
+									],
+								} as FormProps,
+							},
+
+							{
+								type: 'table',
+								field: 'table',
+								formItemProps: {
+									label: 'table',
+								},
+								props: {
+									name: 'table',
+									dataSource: [
+										{
+											name: '123',
+										},
+									],
+									columns: [
+										{
+											title: '姓名',
+											dataIndex: 'name',
+										},
+										{
+											title: '年龄',
+											dataIndex: 'age',
+											type: 'input',
+											rules: [
+												{
+													required: true,
+													message: '地址是必填项，长度不能超过4',
+													max: 4,
+												},
+											],
+											props: {
+												async oninput(...args) {
+													console.log('onChange', args);
+													const result = await args[1].getInterface('f3');
+													console.log('result', result);
+												},
+
+												// onchange() {},
+											},
+										},
+									],
+								} as TableProps,
 							},
 						],
-						props: {
-							async oninput(...args) {
-								console.log('onChange', args);
-								const result = await args[1].getInterface('f3');
-								console.log('result', result);
-							},
-
-							// onchange() {},
+						onSubmit(params) {
+							console.log('params', params);
 						},
 					},
-				],
-			} as TableProps,
+				},
+
+				{
+					tab: 'form-2',
+					tabKey: '2',
+				},
+			],
 		},
-	],
+	},
+	name: 'f1',
+	type: 'drawer',
+	title: 'modal form title',
+
+	// layout: 'inline',
+	// formData: {},
+	// schemas: [
+	// 	{
+	// 		type: 'input',
+	// 		field: 'a',
+	// 		formItemProps: {
+	// 			label: 'a11',
+	// 			required: true,
+	// 			// rules: [],
+	// 		},
+	// 		props: {
+	// 			async onClick(...args) {
+	// 				console.log('a11', args);
+	// 				const f1 = await args[1].getInterface('f1');
+	// 				const f2 = await args[1].getInterface('f2');
+	// 				const f3 = await args[1].getInterface('f3');
+	// 				console.log('f1', f1);
+	// 				console.log('f2', f2);
+	// 				console.log('f3', f3);
+	// 			},
+	// 		},
+	// 	},
+	// 	{
+	// 		type: 'form',
+	// 		field: 'form2',
+	// 		formItemProps: {
+	// 			label: 'form2',
+	// 		},
+	// 		props: {
+	// 			name: 'f2',
+	// 			labelCol: { style: { width: '100px' } },
+	// 			schemas: [
+	// 				{
+	// 					type: 'input',
+	// 					field: 'a22',
+	// 					formItemProps: {
+	// 						label: 'a22',
+	// 					},
+	// 				},
+
+	// 				{
+	// 					type: 'form',
+	// 					field: 'form3',
+	// 					formItemProps: {
+	// 						label: 'form3',
+	// 					},
+	// 					props: {
+	// 						name: 'f3',
+	// 						labelCol: { style: { width: '100px' } },
+	// 						schemas: [
+	// 							{
+	// 								type: 'input',
+	// 								field: 'a33',
+	// 								formItemProps: {
+	// 									label: 'a33',
+	// 									required: true,
+	// 								},
+	// 								props: {
+	// 									async onClick(...args) {
+	// 										console.log('a33', args);
+	// 										const f1 = await args[1].getInterface('f1');
+	// 										const f2 = await args[1].getInterface('f2');
+	// 										const f3 = await args[1].getInterface('f3');
+	// 										console.log('f1', f1);
+	// 										console.log('f2', f2);
+	// 										console.log('f3', f3);
+	// 									},
+	// 								},
+	// 							},
+	// 						],
+	// 					} as FormProps,
+	// 				},
+	// 			],
+	// 		} as FormProps,
+	// 	},
+
+	// 	{
+	// 		type: 'table',
+	// 		field: 'table',
+	// 		formItemProps: {
+	// 			label: 'table',
+	// 		},
+	// 		props: {
+	// 			name: 'table',
+	// 			dataSource: [
+	// 				{
+	// 					name: '123',
+	// 				},
+	// 			],
+	// 			columns: [
+	// 				{
+	// 					title: '姓名',
+	// 					dataIndex: 'name',
+	// 				},
+	// 				{
+	// 					title: '年龄',
+	// 					dataIndex: 'age',
+	// 					type: 'input',
+	// 					rules: [
+	// 						{
+	// 							required: true,
+	// 							message: '地址是必填项，长度不能超过4',
+	// 							max: 4,
+	// 						},
+	// 					],
+	// 					props: {
+	// 						async oninput(...args) {
+	// 							console.log('onChange', args);
+	// 							const result = await args[1].getInterface('f3');
+	// 							console.log('result', result);
+	// 						},
+
+	// 						// onchange() {},
+	// 					},
+	// 				},
+	// 			],
+	// 		} as TableProps,
+	// 	},
+	// ],
 	onSubmit(params) {
 		console.log('params', params);
+		return Promise.reject();
 	},
 });
 </script>

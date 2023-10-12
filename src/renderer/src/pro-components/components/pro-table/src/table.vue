@@ -3,7 +3,11 @@
 		<a-table :class="[ns.b()]" :columns="columnsRef" :data-source="formDataRef.dataSource">
 			<template #bodyCell="{ column, index, record: tableRecord }">
 				<template v-if="column?.type === 'input'">
-					<a-form-item :name="['dataSource', index, column?.dataIndex]" :rules="column?.rules" v-bind="column?.formItemProps">
+					<a-form-item
+						:name="['dataSource', index, column?.dataIndex]"
+						:rules="column?.rules"
+						v-bind="column?.formItemProps"
+					>
 						<a-input v-model:value="tableRecord[column?.dataIndex]" v-bind="column?.props" @change="EventChange" />
 					</a-form-item>
 				</template>

@@ -1,8 +1,8 @@
 /*
  * @Author: Canz
  * @Date: 2022-03-29 15:06:37
- * @LastEditors: Canz
- * @LastEditTime: 2022-04-20 17:28:26
+ * @LastEditors: TRF
+ * @LastEditTime: 2023-10-12 15:18:39
  * @Description:  By接口签名加密算法工具函数
  */
 

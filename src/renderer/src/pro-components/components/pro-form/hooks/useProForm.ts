@@ -31,27 +31,27 @@ export function useProForm(props?: FormProps): [
 	};
 
 	const addField = (schema: FormSchema) => {
-		formApi.value.addField(schema);
+		formApi.value?.addField(schema);
 	};
 
 	const removeField = (field: string) => {
-		formApi.value.removeField(field);
+		formApi.value?.removeField(field);
 	};
 
 	const reset = () => {
-		formApi.value.reset();
+		formApi.value?.reset();
 	};
 
 	const validate = () => {
-		formApi.value.validate();
+		formApi.value?.validate();
 	};
 
 	const validateField = (field: string) => {
-		formApi.value.validateField(field);
+		formApi.value?.validateField(field);
 	};
 
-	const clearValidate = (names?: string[]) => {
-		formApi.value.clearValidate(names);
+	const clearValidate = () => {
+		formApi.value?.clearValidate();
 	};
 	return [
 		register,

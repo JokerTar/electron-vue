@@ -1,44 +1,36 @@
 <template>
-	<ProModal @register="registerModal">
-		<ProForm @register="registerForm" v-bind="formProps"></ProForm>
-	</ProModal>
+	type: {{ modalType }}
+	<component :is="modalType" @register="registerModal" v-bind="modalProps" :okFn="handleOk" :cancelFn="handleCancel">
+		<!-- 优先渲染插槽 -->
+		<template v-if="$slots.default">
+			<slot></slot>
+		</template>
+
+		<template v-else-if="getTabsPaneChildren">
+			<Content :activeKey="activeKey" :tabsPaneChildren="getTabsPaneChildren" />
+		</template>
+
+		<template v-if="formProps.schemas">
+			<ProForm @register="registerForm" v-bind="formProps"></ProForm>
+		</template>
+	</component>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { useProForm, useProModal } from '../../index.ts';
-import { modalFormEmits } from './modal-form';
+import { modalFormEmits, modalFormProps } from './modal-form';
+import { useModalForm } from '../hooks';
 
-const visiable = ref(false);
+const props = defineProps(modalFormProps);
 const emits = defineEmits(modalFormEmits);
 
-const formProps = ref();
-
-const [registerModal, modalApi] = useProModal();
-
-const [registerForm, formApi] = useProForm();
-
-const open = () => {
-	visiable.value = true;
-	return modalApi.open();
-};
-
-const setFormProps = (props) => {
-	if (!visiable.value) {
-		formProps.value = props;
-	} else {
-		formProps.value = {};
-		formApi.setProps(props);
-	}
-};
-
-emits('register', {
-	modalApi: {
-		...modalApi,
-		open,
-	},
-	formApi: {
-		...formApi,
-		setProps: setFormProps,
-	},
-});
+const {
+	activeKey,
+	modalType,
+	modalProps,
+	formProps,
+	getTabsPaneChildren,
+	registerModal,
+	registerForm,
+	handleOk,
+	handleCancel,
+} = useModalForm(props, emits);
 </script>

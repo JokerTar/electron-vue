@@ -1,4 +1,5 @@
 <template>
+	visible： {{ visible }}
 	<a-drawer
 		v-bind="getBind"
 		v-model:visible="visible"
@@ -45,10 +46,18 @@
 				</div>
 
 				<div v-if="tabs && (tabs?.tabPosition == 'top' || !tabs?.tabPosition)" :class="[ns.em('header-tabs')]">
-					<a-tabs v-model:activeKey="activeKey" v-bind="getTabsBind" :style="{ width: calculatedValue(isFull ? '100%' : width) }">
+					<a-tabs
+						v-model:activeKey="activeKey"
+						v-bind="getTabsBind"
+						:style="{ width: calculatedValue(isFull ? '100%' : width) }"
+					>
 						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 
-						<template v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))" #[slot]="record" :key="slot">
+						<template
+							v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))"
+							#[slot]="record"
+							:key="slot"
+						>
 							<slot :name="slot" v-bind="record || {}"></slot>
 						</template>
 					</a-tabs>
@@ -60,10 +69,19 @@
 		<template #default>
 			<div :class="[ns.m('content'), tabs && tabs?.tabPosition == 'right' ? 'row-reverse' : '']">
 				<div v-if="tabs?.tabPosition === 'left' || tabs?.tabPosition === 'right'" :class="[ns.m('content-tabs')]">
-					<a-tabs v-model:activeKey="activeKey" :tab-position="tabs?.tabPosition" v-bind="getTabsBind" style="height: 100%">
+					<a-tabs
+						v-model:activeKey="activeKey"
+						:tab-position="tabs?.tabPosition"
+						v-bind="getTabsBind"
+						style="height: 100%"
+					>
 						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 
-						<template v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))" #[slot]="record" :key="slot">
+						<template
+							v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))"
+							#[slot]="record"
+							:key="slot"
+						>
 							<slot :name="slot" v-bind="record || {}"></slot>
 						</template>
 					</a-tabs>
@@ -81,7 +99,31 @@
 			</div>
 		</template>
 
-		<template v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default'].includes(slotNama))" #[slot]="record" :key="slot">
+		<!-- footer -->
+		<template #footer>
+			<div>
+				<div :class="[ns.m('footer')]">
+					<div :class="[ns.m('footer-extra')]">
+						<slot name="footerExtra"></slot>
+					</div>
+
+					<div :class="[ns.m('footer-actions')]">
+						<slot name="footer">
+							<a-space>
+								<a-button v-if="showCancelBtn" v-bind="cancelBtnProps" @click="EventCancel">{{ cancelText }}</a-button>
+								<a-button v-if="showOkBtn" v-bind="okBtnProps" @click="EventOk">{{ props.okText }}</a-button>
+							</a-space>
+						</slot>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template
+			v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default'].includes(slotNama))"
+			#[slot]="record"
+			:key="slot"
+		>
 			<slot :name="slot" v-bind="record || {}"></slot>
 		</template>
 	</a-drawer>
@@ -96,8 +138,21 @@ import Content from './components/content.vue';
 const props = defineProps(drawerProps);
 const emits = defineEmits(drawerEmits);
 
-const { visible, activeKey, getBind, getTabsBind, isFull, fullModal, close, targetFullModal, getTabsChildren, getTabsPaneChildren, tabsSlots } =
-	useModal(props, emits);
+const {
+	visible,
+	activeKey,
+	getBind,
+	getTabsBind,
+	isFull,
+	fullModal,
+	close,
+	targetFullModal,
+	getTabsChildren,
+	getTabsPaneChildren,
+	tabsSlots,
+	EventOk,
+	EventCancel,
+} = useModal(props, emits);
 
 const { ns, modalTitleRef, calculatedValue } = useModalStyle();
 </script>
@@ -187,6 +242,18 @@ export default {
 		&-wrap {
 			flex: 1;
 			height: 100%;
+		}
+	}
+
+	&--footer {
+		display: flex;
+		justify-content: space-between;
+
+		// &-actions {
+		// }
+
+		&-extra {
+			flex: 1;
 		}
 	}
 }
