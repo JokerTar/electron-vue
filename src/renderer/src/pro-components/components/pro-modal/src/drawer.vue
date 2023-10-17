@@ -49,15 +49,12 @@
 					<a-tabs
 						v-model:activeKey="activeKey"
 						v-bind="getTabsBind"
+						@change="tabsChange"
 						:style="{ width: calculatedValue(isFull ? '100%' : width) }"
 					>
 						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 
-						<template
-							v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))"
-							#[slot]="record"
-							:key="slot"
-						>
+						<template v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))" #[slot]="record" :key="slot">
 							<slot :name="slot" v-bind="record || {}"></slot>
 						</template>
 					</a-tabs>
@@ -69,19 +66,10 @@
 		<template #default>
 			<div :class="[ns.m('content'), tabs && tabs?.tabPosition == 'right' ? 'row-reverse' : '']">
 				<div v-if="tabs?.tabPosition === 'left' || tabs?.tabPosition === 'right'" :class="[ns.m('content-tabs')]">
-					<a-tabs
-						v-model:activeKey="activeKey"
-						:tab-position="tabs?.tabPosition"
-						v-bind="getTabsBind"
-						style="height: 100%"
-					>
+					<a-tabs v-model:activeKey="activeKey" :tab-position="tabs?.tabPosition" v-bind="getTabsBind" @change="tabsChange" style="height: 100%">
 						<a-tab-pane v-for="item in tabs?.tabsPane" :key="item.tabKey" :tab="item.tab" />
 
-						<template
-							v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))"
-							#[slot]="record"
-							:key="slot"
-						>
+						<template v-for="slot in Object.keys($slots).filter((slotNama) => tabsSlots.includes(slotNama))" #[slot]="record" :key="slot">
 							<slot :name="slot" v-bind="record || {}"></slot>
 						</template>
 					</a-tabs>
@@ -119,11 +107,7 @@
 			</div>
 		</template>
 
-		<template
-			v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default'].includes(slotNama))"
-			#[slot]="record"
-			:key="slot"
-		>
+		<template v-for="slot in Object.keys($slots).filter((slotNama) => !['title', 'default'].includes(slotNama))" #[slot]="record" :key="slot">
 			<slot :name="slot" v-bind="record || {}"></slot>
 		</template>
 	</a-drawer>
@@ -152,6 +136,7 @@ const {
 	tabsSlots,
 	EventOk,
 	EventCancel,
+	tabsChange,
 } = useModal(props, emits);
 
 const { ns, modalTitleRef, calculatedValue } = useModalStyle();

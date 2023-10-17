@@ -8,16 +8,8 @@
 					v-bind="schema.props"
 					:rootName="rootName"
 				>
-					<template
-						v-for="slot in Object.keys($slots)"
-						#[getSlotName(slot)]="record"
-						:key="`${getSlotName(slot)}_${schema.slot}`"
-					>
-						<slot
-							v-bind="record"
-							:key="`${getSlotName(slot)}_${schema.slot}_slot`"
-							:name="[`${getSlotName(slot)}_${schema.slot}`]"
-						/>
+					<template v-for="slot in Object.keys($slots)" #[getSlotName(slot)]="record" :key="`${getSlotName(slot)}_${schema.slot}`">
+						<slot v-bind="record" :key="`${getSlotName(slot)}_${schema.slot}_slot`" :name="[`${getSlotName(slot)}_${schema.slot}`]" />
 					</template>
 				</component>
 			</FormItem>

@@ -16,11 +16,7 @@ import router from '@renderer/router';
  * @returns {{data}|*}
  */
 export const requestFulfilled = (config) => {
-	if (
-		config.data &&
-		config.headers['Content-Type'].includes('application/x-www-form-urlencoded') &&
-		typeof config.data !== 'string'
-	)
+	if (config.data && config.headers['Content-Type'].includes('application/x-www-form-urlencoded') && typeof config.data !== 'string')
 		config.data = qs.stringify(config.data);
 
 	// 设置默认提示错误

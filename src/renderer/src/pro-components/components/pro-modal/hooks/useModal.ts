@@ -21,7 +21,9 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 	});
 
 	const getTabsBind = computed(() => {
-		return omit(propsRef.value.tabs, 'tabsPane');
+		return {
+			...omit(propsRef.value.tabs, 'tabsPane'),
+		};
 	});
 
 	const fullModal = computed(() => {
@@ -42,6 +44,10 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		return tabs?.children;
 	});
 
+	const tabsChange = (val: string | number) => {
+		emits('tabsChange', val);
+	};
+
 	const close = () => {
 		visible.value = false;
 	};
@@ -49,10 +55,6 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 	const open = () => {
 		visible.value = true;
 		console.log('open');
-	};
-
-	const tabsChange = () => {
-		visible.value = true;
 	};
 
 	const targetFullModal = () => {

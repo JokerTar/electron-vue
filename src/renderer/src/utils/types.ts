@@ -52,15 +52,7 @@ export const toNumber = (val: any): any => {
 };
 
 export const isEmpty = (obj: any) => {
-	if (
-		typeof obj === 'undefined' ||
-		obj === null ||
-		obj === '' ||
-		obj === '0' ||
-		obj === false ||
-		obj === 0 ||
-		(isArray(obj) && obj.length === 0)
-	) {
+	if (typeof obj === 'undefined' || obj === null || obj === '' || obj === '0' || obj === false || obj === 0 || (isArray(obj) && obj.length === 0)) {
 		return true;
 	} else {
 		return false;
@@ -71,11 +63,7 @@ export const isEmptyVariableInDefault = <T = any>(variable: any, defaultValue: a
 	return variable === undefined || variable === null ? defaultValue : variable;
 };
 
-export const isEmptyDoubleVariableInDefault = <T = any>(
-	variable1: any,
-	variable2: any,
-	defaultValue: any = undefined
-): T => {
+export const isEmptyDoubleVariableInDefault = <T = any>(variable1: any, variable2: any, defaultValue: any = undefined): T => {
 	return isEmptyVariableInDefault(variable1, isEmptyVariableInDefault(variable2, defaultValue));
 };
 

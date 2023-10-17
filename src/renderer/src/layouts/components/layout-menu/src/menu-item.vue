@@ -1,9 +1,7 @@
 <template>
 	<template v-if="menu?.meta?.target">
 		<a-menu-item :key="menu?.path">
-			<a :href="resolvePath('', menu?.meta?.target)" :target="menu?.meta?.blank ? '_blank' : ''">{{
-				menu?.meta?.title
-			}}</a>
+			<a :href="resolvePath('', menu?.meta?.target)" :target="menu?.meta?.blank ? '_blank' : ''">{{ menu?.meta?.title }}</a>
 		</a-menu-item>
 	</template>
 
@@ -25,9 +23,7 @@
 			<a-menu-item-group>
 				<a-menu-item v-for="item in menu?.children" :key="resolvePath(basePath, item?.path)">
 					<template v-if="item.meta?.target">
-						<a :href="resolvePath('', item?.meta?.target)" :target="item?.meta?.blank ? '_blank' : ''">{{
-							item?.meta?.title
-						}}</a>
+						<a :href="resolvePath('', item?.meta?.target)" :target="item?.meta?.blank ? '_blank' : ''">{{ item?.meta?.title }}</a>
 					</template>
 					<template v-else>
 						<router-link :to="resolvePath(basePath, item?.path)">{{ item?.meta?.title }}</router-link>

@@ -24,15 +24,7 @@ export const redirectName = 'Redirect';
 export const homePath = '/';
 
 //路由白名单列表，无需鉴权
-export const routeWhiteList = [
-	'/403',
-	'/404',
-	'/error/*',
-	'/website-*',
-	'/transit/(callback|login)',
-	'/login',
-	'/demo',
-];
+export const routeWhiteList = ['/403', '/404', '/error/*', '/website-*', '/transit/(callback|login)', '/login', '/demo'];
 
 //Token失效回退到登录页时是否记录当前页路由
 export const routeRemember = true;

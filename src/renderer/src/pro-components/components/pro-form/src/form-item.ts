@@ -22,8 +22,4 @@ interface IExtra {
 	noStyle?: boolean;
 }
 
-export type FormItemProps = Omit<
-	ExtractPropTypes<typeof formItemProps>,
-	'hasFeedback' | 'autoLink' | 'hidden' | 'noStyle'
-> &
-	IExtra;
+export type FormItemProps = Omit<ExtractPropTypes<typeof formItemProps>, 'hasFeedback' | 'autoLink' | 'hidden' | 'noStyle'> & IExtra;
