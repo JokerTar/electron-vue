@@ -7,3 +7,4 @@ export * from './pro-modal';
 export * from './pro-table';
 export * from './pro-unit';
 export * from './pro-upload';
+export * from './pro-button';

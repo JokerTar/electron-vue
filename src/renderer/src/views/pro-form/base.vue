@@ -1,12 +1,3 @@
-<!--
- * @Author: TRF
- * @Date: 2023-09-18 16:40:17
- * @LastEditors: TRF
- * @LastEditTime: 2023-10-23 14:21:08
- * @FilePath: \electron-vue\src\renderer\src\views\pro-form\base.vue
- * @Description:
- *
--->
 <template>
 	<div>
 		<ProForm @register="register" />
@@ -37,6 +28,9 @@
 		<ProDrawer @register="registerDrawer" width="800px"></ProDrawer>
 
 		<ProModalForm @register="registerModalForm" destroyOnClose width="980px"></ProModalForm>
+
+		<br />
+		<ProButton type="primary" :submit="handleButtonClick">pro button</ProButton>
 	</div>
 </template>
 <script lang="ts" setup>
@@ -634,4 +628,13 @@ const [registerModalForm, { open: openModalForm }] = useProModalForm({
 	// 	},
 	// },
 });
+
+const handleButtonClick = () => {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			console.log('handleButtonClick');
+			resolve({});
+		}, 1000);
+	});
+};
 </script>
