@@ -229,7 +229,7 @@ export function useForm(
 	// 重置
 	const reset = async (flag: boolean) => {
 		initFormData();
-		formRef.value.resetFields();
+		formRef.value?.resetFields();
 		if (flag) return;
 
 		injectQueue.forEach((item) => {
@@ -261,7 +261,7 @@ export function useForm(
 	};
 
 	// 清空校验
-	const clearValidate = (flag: boolean) => {
+	const clearValidate = (flag: boolean = false) => {
 		formRef.value.clearValidate();
 		if (flag) return;
 

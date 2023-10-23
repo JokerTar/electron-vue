@@ -5,6 +5,10 @@ import { isNumber, isObject, isString } from '@/utils';
 import type { ITabsPane } from './types';
 
 export const commonProps = {
+	destroyOnClose: {
+		type: Boolean,
+	},
+
 	showCancelBtn: {
 		type: Boolean,
 		default: true,

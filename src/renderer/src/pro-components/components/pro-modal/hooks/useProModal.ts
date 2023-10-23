@@ -7,6 +7,7 @@ export function useProModal(props?: ModalProps): [
 		setProps: (props: ModalProps) => void;
 		open: () => void;
 		close: () => void;
+		setTabs: (val: string | number) => void;
 	},
 ] {
 	const modalApi = ref();
@@ -28,5 +29,9 @@ export function useProModal(props?: ModalProps): [
 		modalApi.value.close();
 	};
 
-	return [register, { setProps, open, close }];
+	const setTabs = (val: string | number) => {
+		modalApi.value.setTabs(val);
+	};
+
+	return [register, { setProps, open, close, setTabs }];
 }

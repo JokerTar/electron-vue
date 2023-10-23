@@ -89,7 +89,7 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 	// 重置
 	const reset = async () => {
 		// initFormData();
-		formRef.value.resetFields();
+		formRef.value?.resetFields();
 	};
 
 	// 重置

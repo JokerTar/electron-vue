@@ -1,27 +1,32 @@
-import { ref, nextTick, computed } from 'vue';
+import { ref, toRaw, nextTick } from 'vue';
 import type { SetupContext } from 'vue';
 import type { ModalFormProps, ModalFormEmits } from '../src/modal-form';
 import type { FormProps } from '../../pro-form/src/form.js';
 import type { ModalProps } from '../../pro-modal/src/modal.js';
 import { useProModal } from '../../../index';
 import { isFunction } from '@/utils';
-import { omit } from 'lodash-es';
+import { omit, assign } from 'lodash-es';
 
 export function useModalForm(props: ModalFormProps & FormProps, emits: SetupContext<ModalFormEmits>['emit']) {
 	const visiable = ref(false);
-	const formProps = ref<FormProps>();
-	const modalProps = ref<ModalProps>();
-	const modalType = ref('pro-modal');
-	const activeKey = ref(props.modalProps?.tabs?.value || props.modalProps?.tabs?.tabsPane?.[0].tabKey);
+	const formProps = ref<FormProps | undefined>(props?.formProps);
+	const modalProps = ref(omit(props, ['type', 'formProps']));
+	const modalType = ref(props.type === 'drawer' ? 'pro-drawer' : 'pro-modal');
+	const activeKey = ref(props.tabs?.value || props.tabs?.tabsPane?.[0].tabKey);
 	const formApiMap = new Map();
 	// const currentFormApi = ref();
+	const hasTabsPaneChildren = ref(false);
 
 	const [registerModal, modalApi] = useProModal();
 	// const [registerForm, formApi] = useProForm();
 
 	const open = () => {
-		// debugger;
 		visiable.value = true;
+		activeKey.value = modalProps.value?.tabs?.value || modalProps.value?.tabs?.tabsPane?.[0].tabKey;
+		modalApi.setTabs(activeKey.value);
+
+		console.log('activeKey', activeKey.value);
+
 		nextTick(() => {
 			const currentFormApi = getCurrentFormApi();
 			currentFormApi?.reset();
@@ -29,15 +34,15 @@ export function useModalForm(props: ModalFormProps & FormProps, emits: SetupCont
 		return modalApi.open();
 	};
 
-	const registerForm = (api: Record<string, any>, name: string) => {
-		console.log('hasTabsPaneChildren', hasTabsPaneChildren.value);
-		formApiMap.set(name, api);
+	const registerForm = (api: Record<string, any>, name?: string) => {
+		if (name) formApiMap.set(name, api);
 	};
 
-	const setModalProps = (props: ModalFormProps) => {
-		modalProps.value = props;
+	const setModalProps = (props: ModalProps) => {
+		modalProps.value = assign(toRaw(modalProps.value), props);
 		modalApi.setProps(omit(props, 'type'));
 		activeKey.value = modalProps.value?.tabs?.value || modalProps.value?.tabs?.tabsPane?.[0].tabKey;
+		computeHasTabsPaneChildren();
 	};
 
 	const setModalFormType = (type?: ModalFormProps['type']) => {
@@ -48,6 +53,7 @@ export function useModalForm(props: ModalFormProps & FormProps, emits: SetupCont
 
 	const setFormProps = (props: FormProps) => {
 		if (!visiable.value) {
+			// @ts-ignore
 			formProps.value = omit(props, 'type');
 		} else {
 			getCurrentFormApi().setProps(omit(props, 'type'));
@@ -68,7 +74,7 @@ export function useModalForm(props: ModalFormProps & FormProps, emits: SetupCont
 		}
 	};
 
-	const hasTabsPaneChildren = computed<boolean>(() => {
+	const computeHasTabsPaneChildren = () => {
 		let flag = false;
 
 		modalProps.value?.tabs?.tabsPane &&
@@ -76,8 +82,8 @@ export function useModalForm(props: ModalFormProps & FormProps, emits: SetupCont
 				if (tabsPane.children) flag = true;
 			});
 
-		return flag;
-	});
+		hasTabsPaneChildren.value = flag;
+	};
 
 	const handleOk = async () => {
 		const currentFormApi = getCurrentFormApi();
@@ -92,7 +98,7 @@ export function useModalForm(props: ModalFormProps & FormProps, emits: SetupCont
 
 	const handleCancel = async () => {
 		getCurrentFormApi().clearValidate();
-
+		getCurrentFormApi().reset();
 		return Promise.resolve();
 	};
 

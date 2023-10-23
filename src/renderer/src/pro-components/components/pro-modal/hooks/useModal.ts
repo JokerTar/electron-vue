@@ -13,7 +13,7 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 
 	const setProps = (props: ModalProps) => {
 		propsRef.value = assign(toRaw(propsRef.value), props);
-		activeKey.value = props?.tabs?.value || props?.tabs?.tabsPane?.[0].tabKey;
+		setTabs(props?.tabs?.value || props?.tabs?.tabsPane?.[0].tabKey);
 	};
 
 	const getBind = computed(() => {
@@ -45,16 +45,20 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 	});
 
 	const tabsChange = (val: string | number) => {
+		setTabs(val);
 		emits('tabsChange', val);
 	};
 
-	const close = () => {
+	const setTabs = (val?: string | number) => {
+		activeKey.value = val;
+	};
+
+	const close = async () => {
 		visible.value = false;
 	};
 
 	const open = () => {
 		visible.value = true;
-		console.log('open');
 	};
 
 	const targetFullModal = () => {
@@ -62,11 +66,15 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 	};
 
 	const EventOk = async () => {
-		if (props.okFn && isFunction(props.okFn)) {
-			await props.okFn();
-			close();
-		} else {
-			close();
+		try {
+			if (props.okFn && isFunction(props.okFn)) {
+				await props.okFn();
+				close();
+			} else {
+				close();
+			}
+		} catch (error) {
+			// .
 		}
 	};
 
@@ -83,6 +91,7 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 		setProps,
 		close,
 		open,
+		setTabs,
 	};
 
 	emits('register', api);

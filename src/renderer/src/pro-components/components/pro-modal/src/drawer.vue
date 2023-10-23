@@ -9,8 +9,6 @@
 			tabs && (tabs?.tabPosition == 'left' || tabs?.tabPosition == 'right') ? 'has-content-tabs' : '',
 			fullModal,
 		]"
-		@ok="close"
-		@cancel="close"
 		:style="{ overflow: 'hidden' }"
 		:closable="false"
 		:width="width"

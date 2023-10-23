@@ -7,13 +7,13 @@
 		</template>
 
 		<template v-else-if="hasTabsPaneChildren">
-			<template v-for="(item, index) in formProps.modalProps.tabs.tabsPane" :key="index">
+			<template v-for="(item, index) in modalProps?.tabs?.tabsPane" :key="index">
 				<ProForm v-show="activeKey === item.tabKey" @register="(api) => registerForm(api, item.children?.name)" v-bind="item.children"></ProForm>
 			</template>
 		</template>
 
 		<template v-else>
-			<ProForm @register="(api) => registerForm(api, formProps.name)" v-bind="formProps"></ProForm>
+			<ProForm @register="(api) => registerForm(api, formProps?.name)" v-bind="formProps"></ProForm>
 		</template>
 	</component>
 </template>
