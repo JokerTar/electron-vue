@@ -3,10 +3,12 @@ import type { ComputedRef, Ref, SetupContext } from 'vue';
 import type { FormProps, FormSchema, FormEmits } from '../src/form';
 import { Form } from 'ant-design-vue';
 import { FormItemProps } from '../src/form-item';
-import { isFunction, omit } from 'lodash-es';
+import { isFunction, omit, set, assign } from 'lodash-es';
 // import { ProUpload } from '../../upload/index';
 import { componentsAlias } from '../src/componentAlias';
 import { isObject } from '@/utils';
+import { useFetch } from '../../../hooks/useFetch';
+import { formDefaultSetting } from '../src/defaultSetting';
 
 export function useForm(
 	props: FormProps,
@@ -68,6 +70,9 @@ export function useForm(
 		initSchemas();
 		initFormData();
 		getRules();
+
+		// 获取schema上的fetch
+		asyncFetchSchemas();
 	};
 
 	const initFormData = () => {
@@ -89,6 +94,27 @@ export function useForm(
 				return coverEvent(schema);
 			});
 		}
+	};
+
+	const asyncFetchSchemas = () => {
+		schemasRef.value.forEach(async (schema) => {
+			if (schema.fetch) {
+				const { reload, getData } = useFetch(schema.fetch);
+				await reload();
+
+				if (!schema.fetch.to) {
+					if (schema.props) {
+						schema.props.options = getData();
+					} else {
+						schema.props = {
+							options: getData(),
+						};
+					}
+				} else {
+					set(schema, schema.fetch.to, getData());
+				}
+			}
+		});
 	};
 
 	// 混合方法
@@ -125,7 +151,7 @@ export function useForm(
 
 	const getFormBind = computed(() => {
 		if (!toRaw(propsRef.value)) return {};
-		return omit(toRaw(propsRef.value), ['schemas', 'modal', 'onSubmit']);
+		return assign(omit(toRaw(propsRef.value), ['schemas', 'modal', 'onSubmit']), formDefaultSetting);
 	}) as ComputedRef<Omit<FormProps, 'schemas' | 'modal' | 'onSubmit'>>;
 
 	const getFormItemBind = computed(() => {

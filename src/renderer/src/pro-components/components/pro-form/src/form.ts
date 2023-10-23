@@ -3,6 +3,7 @@ import { formProps as antFormProps } from 'ant-design-vue/lib/form';
 import type { FormItemProps } from './form-item';
 // import type { FormProps as AntFormProps } from 'ant-design-vue/lib/form';
 import { isObject } from '@/utils';
+import type { FetchConfig } from '../../../hooks/useFetch';
 
 export const formProps = {
 	...antFormProps(),
@@ -56,6 +57,7 @@ export type FormSchema = {
 	prefix?: string | VNode; // 前缀
 	suffix?: string | VNode; // 后缀
 	style?: CSSProperties; // form-item ->
+	fetch?: FetchConfig;
 };
 export type FormProps = Partial<ExtractPropTypes<typeof formProps>>;
 export type FormEmits = typeof formEmits;

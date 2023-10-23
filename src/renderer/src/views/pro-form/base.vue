@@ -360,6 +360,36 @@ const [registerModalForm, { open: openModalForm }] = useProModalForm({
 					// layout: 'inline',
 					schemas: [
 						{
+							type: 'select',
+							field: 'select',
+							formItemProps: {
+								label: 'select',
+							},
+							props: {
+								options: [
+									{
+										label: 'aa',
+										value: '11',
+									},
+								],
+							},
+							fetch: {
+								url: '/admin/shop/shop/list',
+								method: 'POST',
+								// beforeFetch() {
+								// 	return false;
+								// },
+								afterFetch(result) {
+									return result.map((item) => {
+										return {
+											label: item.short_name,
+											value: item.id,
+										};
+									});
+								},
+							},
+						},
+						{
 							type: 'input',
 							field: 'fa',
 							formItemProps: {
