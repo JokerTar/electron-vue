@@ -28,7 +28,6 @@ export function useProModalForm(props: ModalFormProps): ProModalForm {
 	const modalFormApi = ref();
 
 	const register = (api) => {
-		console.log(api);
 		modalApi.value = api.modalApi;
 		formApi.value = api.formApi;
 		modalFormApi.value = api;

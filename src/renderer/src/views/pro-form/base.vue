@@ -9,6 +9,8 @@
 		<a-button @click="open">open modal</a-button>
 		<a-button @click="openDrawer">open drawer</a-button>
 		<a-button @click="openModalForm">open modal form</a-button>
+		<a-button @click="reload({})">reload</a-button>
+		<a-button @click="changeColumns">setColumns</a-button>
 
 		<ProModal @register="registerModal" :closable="true" title="aaa" height="200px">
 			ssss
@@ -37,6 +39,7 @@
 // import { ref } from 'vue';
 import { useProForm, useProTable, useProModal, useProModalForm } from '@renderer/pro-components';
 import type { FormProps, TableProps } from '@renderer/pro-components';
+
 const [register, { submit, reset }] = useProForm({
 	name: 'f1',
 	// layout: 'inline',
@@ -115,23 +118,41 @@ const [register, { submit, reset }] = useProForm({
 				name: 'table',
 				dataSource: [
 					{
-						name: '123',
+						name: 'name Long Column Long Column Long Column',
+						image: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+						link: 'https://www.baidu.com/',
+						tag: 'tag',
+						select: '11',
+						age: 18,
 					},
 				],
 				columns: [
 					{
 						title: '姓名',
 						dataIndex: 'name',
+						width: '10%',
+						ellipsis: true,
+
+						edit: {
+							type: 'input',
+							rules: [
+								{
+									required: true,
+									message: '这一项是必填的',
+								},
+							],
+						},
 					},
 					{
 						title: '年龄',
 						dataIndex: 'age',
+						width: '10%',
 						type: 'input',
 						rules: [
 							{
 								required: true,
 								message: '地址是必填项，长度不能超过4',
-								max: 4,
+								// max: 4,
 							},
 						],
 						props: {
@@ -140,8 +161,83 @@ const [register, { submit, reset }] = useProForm({
 								const result = await args[1].getInterface('f3');
 								console.log('result', result);
 							},
+						},
+					},
 
-							// onchange() {},
+					{
+						title: 'select',
+						dataIndex: 'select',
+						width: '10%',
+
+						rules: [
+							{
+								required: true,
+								message: '11select is required',
+							},
+						],
+
+						edit: {
+							type: 'select',
+							rules: [
+								{
+									required: true,
+									message: '22select is required',
+								},
+							],
+							props: {
+								allowClear: true,
+								options: [
+									{
+										label: 'aa',
+										value: '11',
+									},
+									{
+										label: 'bb',
+										value: '22',
+									},
+								],
+								async onChange(...args) {
+									console.log('onChange', args);
+									const result = await args[1].getInterface('f3');
+									console.log('result', result);
+								},
+
+								// onchange() {},
+							},
+						},
+					},
+
+					{
+						title: 'image',
+						dataIndex: 'image',
+						width: '10%',
+						type: 'image',
+						props: {
+							// width: '42px',
+							// src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+						},
+					},
+
+					{
+						title: 'link',
+						dataIndex: 'link',
+						width: '10%',
+						type: 'link',
+						props: {
+							target: '',
+						},
+					},
+
+					{
+						title: 'tag',
+						dataIndex: 'tag',
+						width: '10%',
+						type: 'tag',
+						props: {
+							color: '#333',
+							// parse() {
+							// 	return [{ label: '11', props: { color: '#333' } }, '22'];
+							// },
 						},
 					},
 				],
@@ -153,7 +249,23 @@ const [register, { submit, reset }] = useProForm({
 	},
 });
 
-const [registerTable] = useProTable({
+const [registerTable, { reload, setColumns }] = useProTable({
+	immediate: false,
+	fetch: {
+		url: 'admin/order/order/index',
+		method: 'POST',
+		getPath: 'record.list',
+		beforeFetch(params) {
+			console.log('beforeFetch', params);
+			return {
+				...params,
+				id: 100,
+			};
+		},
+		afterFetch() {
+			return [{ name: 'name', address: 'address' }];
+		},
+	},
 	dataSource: [
 		{
 			name: '123',
@@ -663,8 +775,15 @@ const handleButtonClick = () => {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			console.log('handleButtonClick');
-			resolve({});
+			resolve({
+				title: 'aa',
+				dataIndex: 'name',
+			});
 		}, 1000);
 	});
+};
+
+const changeColumns = () => {
+	setColumns([{ title: 'aa', dataIndex: 'name' }]);
 };
 </script>

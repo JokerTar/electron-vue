@@ -37,7 +37,7 @@ export function useFetch(props: FetchConfig | string): IResponse {
 
 		if (isObject(props)) {
 			// @ts-ignore
-			const { url, method = 'GET', params, afterFetch, beforeFetch, getPath }: FetchConfig = props;
+			const { url, method = 'POST', params, afterFetch, beforeFetch, getPath }: FetchConfig = props;
 
 			let fetchQueryData: Record<string, any> | undefined | false = Object.assign(params || {}, fetchQuery);
 			if (beforeFetch && isFunction(beforeFetch)) {

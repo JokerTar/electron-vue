@@ -11,7 +11,5 @@ import { buttonProps } from './button';
 
 const props = defineProps(buttonProps);
 
-console.log('button-props', props);
-
 const { getBind, loadingRef, disabledRef, ClickEvent } = useButton(props);
 </script>

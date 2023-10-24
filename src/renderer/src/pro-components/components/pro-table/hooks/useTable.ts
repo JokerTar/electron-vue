@@ -1,8 +1,11 @@
-import { ref, reactive, toRaw, nextTick } from 'vue';
+import { ref, reactive, toRaw, nextTick, computed } from 'vue';
 import type { SetupContext } from 'vue';
 import type { TableProps, TableEmits } from '../src/table';
 import { Form } from 'ant-design-vue';
 import { isObject, isFunction } from '@/utils';
+// import { useFetch } from '../hooks';
+import { useFetch } from '../../../hooks/useFetch';
+import { omit } from 'lodash-es';
 
 export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emit']) {
 	const propsRef = ref<TableProps>(props);
@@ -21,11 +24,15 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		!hasSetProps.value && setProps(props);
 	});
 
+	const getTableBind = computed(() => {
+		return omit(propsRef.value, ['columns', 'data-source']);
+	});
+
 	const setProps = (props: TableProps) => {
 		hasSetProps.value = true;
 		propsRef.value = props;
 		setColumns(propsRef.value.columns);
-		setTableData(propsRef.value.dataSource || []);
+		if (props.immediate) reload();
 	};
 
 	const updateValue = () => {
@@ -33,9 +40,25 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		formItemContext.onFieldChange();
 	};
 
-	const setTableData = (tableData: Record<string, any>[]) => {
-		formDataRef.dataSource = tableData;
-		updateValue();
+	const reload = (searchInfo?: Record<string, any>) => {
+		// eslint-disable-next-line no-async-promise-executor
+		return new Promise(async (resolve, reject) => {
+			if (props.fetch) {
+				try {
+					const { reload, getData } = useFetch(props.fetch);
+					await reload(searchInfo);
+					formDataRef.dataSource = getData();
+					resolve(formDataRef.dataSource);
+				} catch (error) {
+					reject();
+				}
+			} else {
+				formDataRef.dataSource = propsRef.value.dataSource || [];
+			}
+
+			updateValue();
+			resolve(formDataRef.dataSource);
+		});
 	};
 
 	const getTableData = () => {
@@ -98,11 +121,6 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		formRef.value.clearValidate();
 	};
 
-	// 监听列表表单输入变化
-	const EventChange = () => {
-		updateValue();
-	};
-
 	// 混合方法
 	const coverEvent = (object: Record<string, any>, coverObj = { getInterface: tableApi.getInterface }) => {
 		if (!object) return;
@@ -140,7 +158,7 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		injectQueue,
 		props: toRaw(props),
 		setProps,
-		setTableData,
+		reload,
 		getTableData,
 		setColumns,
 		getInterface,
@@ -153,11 +171,11 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 
 	return {
 		formRef,
+		getTableBind,
 		formDataRef,
 		rulesRef,
 		columnsRef,
 		injectQueue,
-		EventChange,
 		saveInjectInRoot,
 		coverEvent,
 	};
