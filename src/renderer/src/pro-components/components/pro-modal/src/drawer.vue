@@ -119,8 +119,6 @@ import Content from './components/content.vue';
 const props = defineProps(drawerProps);
 const emits = defineEmits(drawerEmits);
 
-console.log('drawer props', props);
-
 const {
 	visible,
 	activeKey,
