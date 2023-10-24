@@ -1,5 +1,4 @@
 <template>
-	visible： {{ visible }}
 	<a-drawer
 		v-bind="getBind"
 		v-model:visible="visible"
@@ -119,6 +118,8 @@ import Content from './components/content.vue';
 
 const props = defineProps(drawerProps);
 const emits = defineEmits(drawerEmits);
+
+console.log('drawer props', props);
 
 const {
 	visible,

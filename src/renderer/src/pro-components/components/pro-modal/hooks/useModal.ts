@@ -22,7 +22,7 @@ export function useModal(props: ModalProps, emits: SetupContext<ModalEmits>['emi
 
 	const getTabsBind = computed(() => {
 		return {
-			...omit(propsRef.value.tabs, 'tabsPane'),
+			...omit(propsRef.value.tabs, ['tabsPane', 'change', 'onChange', 'onchange']),
 		};
 	});
 
