@@ -36,7 +36,7 @@ export default defineComponent({
 <style>
 .site-layout-content {
 	padding: 24px;
-	min-height: 100%;
+	height: 100%;
 	background: #fff;
 }
 

@@ -104,6 +104,27 @@ export const localRouters: Router[] = [
 	},
 
 	{
+		path: '/table',
+		name: 'table',
+		component: Layouts,
+		redirect: '/table/base',
+		meta: {
+			title: 'pro-table',
+			icon: 'table-outlined',
+		},
+		children: [
+			{
+				path: 'base',
+				name: 'pro-table-name',
+				component: () => import('@renderer/views/pro-table/base.vue'),
+				meta: {
+					title: 'base',
+				},
+			},
+		],
+	},
+
+	{
 		path: '/target',
 		name: 'target',
 		meta: {

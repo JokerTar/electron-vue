@@ -3,8 +3,8 @@ import type { SetupContext } from 'vue';
 import type { TableProps, TableEmits } from '../src/table';
 import { Form } from 'ant-design-vue';
 import { isObject, isFunction } from '@/utils';
-// import { useFetch } from '../hooks';
 import { useFetch } from '../../../hooks/useFetch';
+import { useProForm } from '../../index';
 import { omit } from 'lodash-es';
 
 export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emit']) {
@@ -19,6 +19,11 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 	let injectQueue: Map<string, Record<string, any>> = new Map();
 
 	const formItemContext = Form.useInjectFormItemContext();
+
+	const [registerForm, { submit: searchSubmit, reset: searchReset }] = useProForm({});
+
+	console.log(searchSubmit);
+	console.log(searchReset);
 
 	nextTick(() => {
 		!hasSetProps.value && setProps(props);
@@ -176,6 +181,7 @@ export function useTable(props: TableProps, emits: SetupContext<TableEmits>['emi
 		rulesRef,
 		columnsRef,
 		injectQueue,
+		registerForm,
 		saveInjectInRoot,
 		coverEvent,
 	};

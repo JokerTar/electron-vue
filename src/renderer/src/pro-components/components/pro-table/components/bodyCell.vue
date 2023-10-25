@@ -1,27 +1,84 @@
-import { isObject } from 'lodash-es';
 <template>
 	<a-form-item :name="['dataSource', index, column?.dataIndex]" :rules="columnRulesRef" v-bind="column?.formItemProps">
-		<!-- <BodyCell :column="column" :index="index" :record="tableRecord" v-model:value="tableRecord[column?.dataIndex]" /> -->
+		<template v-if="columnTypeRef === 'index'">
+			<div class="pro-table-cell">
+				{{ index || 0 + 1 }}
+			</div>
+		</template>
+
+		<template v-if="columnTypeRef === 'option'">
+			<div class="pro-table-cell">
+				<a-space size="small">
+					<template v-for="item in column?.actions.filter((o) => (o?.isShow ? o?.isShow(toRaw(record)) : true)) || []" :key="item">
+						<a-button v-if="item?.type === 'button' || !item.type" size="small" type="link" v-bind="item.props" @click="OptionEvent(item)">
+							{{ item?.label }}
+						</a-button>
+
+						<a-dropdown v-if="item?.type === 'dropdown'" size="small">
+							<a-button size="small" @click.prevent type="link">
+								<ellipsis-outlined />
+							</a-button>
+							<template #overlay>
+								<a-menu>
+									<a-menu-item v-for="dropdown in item?.items || []" :key="dropdown" @click="OptionEvent(dropdown)">
+										{{ dropdown?.label }}
+									</a-menu-item>
+								</a-menu>
+							</template>
+						</a-dropdown>
+					</template>
+				</a-space>
+			</div>
+		</template>
 
 		<template v-if="columnTypeRef === 'image'">
-			<a-image :src="getValue" width="42px" v-bind="getBind" />
+			<div class="pro-table-cell">
+				<div class="pro-table-cell-ellipsis-wrap">
+					<a-image :src="getValue" width="42px" v-bind="getBind" />
+					<div v-if="column?.copyable">
+						<a-button type="link" size="small" @click="CopyEvent(getOptionsLabel(cacheOptions, getValue) || getValue)">
+							<copy-outlined v-if="!copyFlag" />
+							<check-outlined v-else />
+						</a-button>
+					</div>
+				</div>
+			</div>
 		</template>
 
 		<template v-else-if="columnTypeRef === 'link'">
-			<router-link v-if="getValue" :to="getValue">{{ getValue }}</router-link>
-			<a-button v-else type="link">
-				{{ getValue }}
-			</a-button>
+			<div class="pro-table-cell">
+				<div class="pro-table-cell-ellipsis-wrap">
+					<div ref="containerWrapRef" :class="['ant-table-cell', hasEllipsis ? 'ant-table-cell-ellipsis' : '', column?.edit ? 'has-edit' : '']">
+						<router-link v-if="getValue" :to="getValue">{{ getValue }}</router-link>
+						<a-button v-else type="link">
+							{{ getValue }}
+						</a-button>
+					</div>
+					<div v-if="column?.copyable">
+						<a-button type="link" size="small" @click="CopyEvent(getOptionsLabel(cacheOptions, getValue) || getValue)">
+							<copy-outlined v-if="!copyFlag" />
+							<check-outlined v-else />
+						</a-button>
+					</div>
+				</div>
+			</div>
 		</template>
 
 		<template v-else-if="columnTypeRef === 'tag'">
-			<template v-if="Array.isArray(parse)">
-				<a-tag v-for="(item, index) in parse" :key="index" v-bind="item?.props ? item?.props : {}">{{ isObject(item) ? item.label : item }}</a-tag>
-			</template>
-			<template v-else>
-				<div v-if="isEmpty(getValue)" v-bind="getBind">{{ getValue }}</div>
-				<a-tag v-else v-bind="getBind">{{ getValue }}</a-tag>
-			</template>
+			<div class="pro-table-cell">
+				<div :class="['ant-table-cell', hasEllipsis ? 'ant-table-cell-ellipsis' : '', column?.edit ? 'has-edit' : '']">
+					<template v-if="Array.isArray(parse)">
+						<a-tag v-for="(item, index) in parse" :key="index" v-bind="item?.props ? item?.props : {}">
+							{{ isObject(item) ? item.label : item }}
+						</a-tag>
+					</template>
+
+					<template v-else>
+						<div v-if="isEmpty(getValue)" v-bind="getBind">{{ getValue }}</div>
+						<a-tag v-else v-bind="getBind">{{ getValue }}</a-tag>
+					</template>
+				</div>
+			</div>
 		</template>
 
 		<!-- 表单类 -->
@@ -29,29 +86,56 @@ import { isObject } from 'lodash-es';
 			<component
 				:is="getFormItemType(columnTypeRef)"
 				ref="formComRef"
+				v-bind="getBind"
 				v-model:[getModalBind(getFormItemType(columnTypeRef))]="modalValue"
 				@change="EventChange"
 				@blur="EventBlur"
-				v-bind="getBind"
 			/>
 		</template>
 
 		<template v-else>
-			<div :class="['ant-table-cell', hasEllipsis ? 'ant-table-cell-ellipsis' : '', column.edit ? 'has-edit' : '']" @click="EventClick">
-				{{ getValue }}
+			<div class="pro-table-cell">
+				<div class="pro-table-cell-ellipsis-wrap">
+					<div
+						ref="containerWrapRef"
+						:class="['ant-table-cell', hasEllipsis ? 'ant-table-cell-ellipsis' : '', column?.edit ? 'has-edit' : '']"
+						@click="EventClick"
+					>
+						<a-tooltip placement="top">
+							<template #title v-if="overFlowing">
+								<span>{{ getOptionsLabel(cacheOptions, getValue) || getValue }}</span>
+							</template>
+							<span ref="containerRef">{{ getOptionsLabel(cacheOptions, getValue) || getValue }}</span>
+						</a-tooltip>
+					</div>
+					<div v-if="column?.copyable">
+						<a-button type="link" size="small" @click="CopyEvent(getOptionsLabel(cacheOptions, getValue) || getValue)">
+							<copy-outlined v-if="!copyFlag" />
+							<check-outlined v-else />
+						</a-button>
+					</div>
+				</div>
 			</div>
 		</template>
 	</a-form-item>
 </template>
 <script lang="ts">
-import { ref, defineComponent, computed, nextTick } from 'vue';
+import { ref, defineComponent, computed, nextTick, onMounted, toRaw } from 'vue';
 import type { PropType } from 'vue';
 import type { IExtarColumns } from '../src/table';
-import { isFunction, isObject, isEmpty } from '@/utils';
+import { isFunction, isObject, isEmpty, getOptionsLabel, copy } from '@/utils';
 import { omit, get } from 'lodash-es';
 import { componentsAlias } from './componentAlias';
+import { CopyOutlined, CheckOutlined, EllipsisOutlined } from '@ant-design/icons-vue';
+import { useMessage } from '../../../hooks';
 
 export default defineComponent({
+	components: {
+		CopyOutlined,
+		CheckOutlined,
+		EllipsisOutlined,
+	},
+
 	props: {
 		type: String as PropType<IExtarColumns['type']>,
 
@@ -81,9 +165,21 @@ export default defineComponent({
 	setup(props, { emit }) {
 		const modalValue = ref(get(props.record, props.column?.dataIndex));
 		const formComRef = ref();
+		const containerWrapRef = ref();
+		const containerRef = ref();
 		const isEditRef = ref(false);
 		const columnTypeRef = ref(props.column?.type);
 		const columnRulesRef = ref(props.column?.rules);
+		const copyFlag = ref(false);
+		const overFlowingFlag = ref();
+
+		let cacheOptions = ref(props?.column?.edit?.props?.options);
+
+		const { createConfirm } = useMessage();
+
+		onMounted(() => {
+			overFlowingFlag.value = containerRef.value?.offsetWidth > containerWrapRef.value?.offsetWidth;
+		});
 
 		const EventChange = (e) => {
 			if (isObject(e) && isObject(e.target)) {
@@ -119,19 +215,30 @@ export default defineComponent({
 		});
 
 		const getValue = computed(() => {
-			return get(props.record, props.column?.dataIndex);
+			return getLabel.value || get(props.record, props.column?.dataIndex);
+		});
+
+		const getLabel = computed(() => {
+			if (!cacheOptions.value || !Array.isArray(cacheOptions.value) || !cacheOptions.value.length) return;
+
+			return getOptionsLabel(cacheOptions.value, getBind.value);
 		});
 
 		const parse = computed(() => {
 			if (props?.column?.props?.parse && isFunction(props.column.props.parse)) {
 				return props.column.props.parse(props.record);
 			} else {
-				return props?.record[props?.column?.dataIndex];
+				return props?.record?.[props?.column?.dataIndex];
 			}
 		});
 
 		const hasEllipsis = computed(() => {
 			return props?.column?.ellipsis === true;
+		});
+
+		const overFlowing = computed(() => {
+			if (!containerRef.value || !containerWrapRef.value) return overFlowingFlag;
+			return containerRef.value?.offsetWidth > containerWrapRef.value?.offsetWidth;
 		});
 
 		const targetEditType = () => {
@@ -159,31 +266,81 @@ export default defineComponent({
 			targetEditType();
 		};
 
+		const CopyEvent = (val) => {
+			if (!props?.column?.copyable || copyFlag.value) return;
+			copy(val);
+			copyFlag.value = true;
+
+			setTimeout(() => {
+				copyFlag.value = false;
+			}, 3000);
+		};
+
+		const OptionEvent = (item) => {
+			if (item.popConfirm) {
+				const params = {};
+
+				for (const key in item.popConfirm) {
+					if (Object.prototype.hasOwnProperty.call(item.popConfirm, key)) {
+						if (isFunction(item.popConfirm[key])) {
+							params[key] = item.popConfirm[key](toRaw(props.record), props.index);
+						} else {
+							params[key] = item.popConfirm[key];
+						}
+					}
+				}
+
+				createConfirm({
+					...params,
+				});
+			} else if (item.onClick && isFunction(item.onClick)) {
+				item.onClick(toRaw(props.record), props.index);
+			}
+		};
+
 		return {
 			modalValue,
 			getBind,
 			getValue,
-			EventChange,
+			cacheOptions,
 			parse,
-			isObject,
-			isEmpty,
 			getModalBind,
 			getFormItemType,
 			hasEllipsis,
+			overFlowing,
 			formComRef,
+			containerWrapRef,
+			containerRef,
 			isEditRef,
-			EventClick,
-			EventBlur,
 			columnTypeRef,
 			columnRulesRef,
+			copyFlag,
+			toRaw,
+			isObject,
+			isEmpty,
+			EventChange,
+			EventClick,
+			EventBlur,
+			getOptionsLabel,
+			CopyEvent,
+			OptionEvent,
 		};
 	},
 });
 </script>
 <style lang="less">
-.pro-table .has-edit {
-	cursor: pointer;
-	width: 100%;
-	min-height: 24px;
+.pro-table {
+	.has-edit {
+		cursor: pointer;
+		width: 100%;
+		min-height: 24px;
+	}
+
+	.pro-table-cell {
+		.pro-table-cell-ellipsis-wrap {
+			display: flex;
+			justify-content: space-between;
+		}
+	}
 }
 </style>
